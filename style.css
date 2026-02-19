@@ -1,0 +1,118 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-image: url("./img/start-screen/background-img.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+@font-face {
+    font-family: "New Mexico";
+    src: url("./font/new-mexico-demo.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-family: "New Mexico", sans-serif !important;
+    font-weight: normal;
+    text-shadow: 1px 3px 3px #000 !important;
+    font-size: 60px;
+}
+
+.center {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+canvas {
+    background-color: black;
+    display: none;
+}
+
+#splash-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+}
+
+#start-screen {
+    width: 100%;
+    max-width: 720px;
+    height: 480px;
+}
+
+#start-button {
+    top: 100px;
+    position: absolute;
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    max-height: 300px;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+#start-button:hover {
+    transform: translateY(-6px) scale(1.03);
+    filter: brightness(1.1);
+}
+
+.game-wrapper {
+    position: relative;
+    width: 720px;
+    height: 480px;
+    border: 3px solid rgb(245, 3, 3);
+}
+
+.game-title {
+    margin-bottom: 16px;
+    color: #fff;
+}
+
+#pause-menu {
+    display: none;
+}
+
+.restart-button {
+    position: absolute;
+    top: 35%;
+    left: 54%;
+    width: 281px;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.continue-button {
+    position: absolute;
+    top: 40%;
+    left: 8%;
+    width: 320px;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.restart-button:hover {
+    transform: translateY(-6px) scale(1.03);
+    filter: brightness(1.1);
+}
+
+.continue-button:hover {
+    transform: translateY(-6px) scale(1.03);
+    filter: brightness(1.1);
+}
+
+.border-screen {
+    width: 1000px;
+    height: auto;
+}
