@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Document</title>
+    <script src="./js/audio-manager.js"></script>
     <script src="./models/drawable-object.class.js"></script>
     <script src="./models/movable-object.class.js"></script>
     <script src="./models/throwable-object.class.js"></script>
@@ -34,13 +35,16 @@
 
     <div class="center">
         <h1 class="game-title">El Pollo Loco</h1>
-        <div class="game-wrapper">
+        <div id="fullscreen" class="game-wrapper">
+            <img src="./img/start-screen/fullscreen.png" id="fullscreen-button" onclick="enterFullscreen()">
+            <img src="./img/start-screen/minimize-icon-5.png" id="fullscreen-exit-button" onclick="exitFullscreen()">
+            <img src="./img/start-screen/mute.png" id="mute" onclick="toggleMute()">
             <canvas id="canvas" width="720" height="480"> </canvas>
             <img id="start-screen" src="img/9_intro_outro_screens/start/startscreen_1.png">
-    <div id="pause-menu">
-        <img class="continue-button" onclick="continueGame()" src="./img/end-screen/Continue.png">
-        <img class="restart-button" onclick="restartGame()" src="./img/end-screen/Restart Button.png">
-    </div>
+            <div id="pause-menu">
+                <img class="continue-button" onclick="continueGame()" src="./img/end-screen/Continue.png">
+                <img class="restart-button" onclick="restartGame()" src="./img/end-screen/Restart Button.png">
+            </div>
             <div id="splash-screen">
                 <img class="border-screen" src="./img/start-screen/Borderscreen.png">
                 <img src="./img/start-screen/start-button.png" onclick="startGame()" id="start-button" value="Start" />

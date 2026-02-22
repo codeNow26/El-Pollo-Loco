@@ -5,6 +5,14 @@ let menuMusic;
 let GAME_PAUSED = false;
 let keyboard = new Keyboard();
 
+
+
+
+
+
+
+
+
 function init() {
     canvas = document.getElementById("canvas");
     world = new World(canvas, keyboard)
@@ -98,3 +106,29 @@ function continueGame() {
     GAME_PAUSED = false;
     backgroundMusic.volume = 0.2;
 }
+
+function enterFullscreen() {
+    const element = document.getElementById("fullscreen");
+    document.getElementById("fullscreen-exit-button").style.display = "block";
+    document.getElementById("fullscreen-button").style.display = "none";
+
+    if (element.requestFullscreen) {
+        element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+    } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+    }
+}
+
+function exitFullscreen() {
+    document.getElementById("fullscreen-exit-button").style.display = "none";
+     document.getElementById("fullscreen-button").style.display = "block";
+
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    }
+}
+
