@@ -41,7 +41,8 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: auto;
+    z-index: 30000;
+    pointer-events: none;  
 }
 
 #start-screen {
@@ -49,6 +50,7 @@ canvas {
     max-width: 720px;
     height: 480px;
 }
+
 
 #start-button {
     top: 100px;
@@ -58,6 +60,7 @@ canvas {
     height: auto;
     max-height: 300px;
     cursor: pointer;
+    pointer-events: auto;
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
@@ -116,7 +119,7 @@ canvas {
 }
 
 #game-over-home-btn:hover {
-       transform: translateY(-6px) scale(1.03);
+    transform: translateY(-6px) scale(1.03);
     filter: brightness(1.1);
 }
 
@@ -178,7 +181,7 @@ canvas {
 }
 
 #fullscreen-button:hover {
-       transform: translateY(-3px) scale(1.03);
+    transform: translateY(-3px) scale(1.03);
     filter: brightness(1.1);
 }
 
@@ -203,7 +206,7 @@ canvas {
 }
 
 #sound-on-icon:hover {
-         transform: translateY(-3px) scale(1.03);
+    transform: translateY(-3px) scale(1.03);
     filter: brightness(1.1);
 }
 
@@ -217,7 +220,7 @@ canvas {
 }
 
 #mute:hover {
-      transform: translateY(-3px) scale(1.03);
+    transform: translateY(-3px) scale(1.03);
     filter: brightness(1.1);
 }
 
@@ -231,7 +234,7 @@ canvas {
 }
 
 #controls:hover {
-          transform: translateY(-3px) scale(1.03);
+    transform: translateY(-3px) scale(1.03);
     filter: brightness(1.1);
 }
 
@@ -254,4 +257,79 @@ canvas {
     top: 0px;
     right: 30px;
     gap: 20px;
+}
+
+#impressum {
+    width: 200px;
+    z-index: 1000;
+    top: -7px;
+    right: 107px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#impressum:hover {
+    transform: translateY(-3px) scale(1.03);
+    filter: brightness(1.1);
+}
+
+#impressum-img {
+    width: 100%;
+    max-width: 720px;
+    height: 480px;
+}
+
+#impressum-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: none;
+    width: 100%;
+    max-width: 720px;
+    height: 480px;
+    z-index: 9999;
+}
+
+#impressum-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 70%;
+    box-sizing: border-box;
+    padding: 24px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border-radius: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: bisque rgba(0, 0, 0, 0.2);
+    border: 6px solid bisque;
+}
+
+.impressum-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.impressum-content h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.impressum-content hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.impressum-close {
+    margin: 30px auto 0;
+    display: block;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    position: absolute;
+    top: -10px;
+    right: 22px;
 }

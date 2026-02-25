@@ -147,18 +147,13 @@ function toggleControlsScreen() {
     }
 }
 
-   function backToTitleScreen() {
-
+function backToTitleScreen() {
     GAME_OVER = false;
     GAME_PAUSED = false;
-
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
-
     gameOverMusic.pause();
     gameOverMusic.currentTime = 0;
-
-
     document.getElementById("pause-menu").style.display = "none";
     document.getElementById("game-over-screen").style.display = "none";
 
@@ -166,5 +161,22 @@ function toggleControlsScreen() {
 
     document.getElementById("start-screen").style.display = "block";
     document.getElementById("splash-screen").style.display = "block";
+}
+
+function toggleImpressumScreen() {
+    const showImpressum = document.getElementById("impressum-screen");
+    const impressumOverlay = document.getElementById("impressum-overlay")
+    
+    if (!impressumOverlay.innerHTML.trim()) {
+        impressumOverlay.innerHTML = impressumTemplate();
+    }
+
+    if (showImpressum.style.display === "block") {
+        showImpressum.style.display = "none";
+        document.getElementById("start-button").style.display = "block"
+    } else {
+        showImpressum.style.display = "block";
+        document.getElementById("start-button").style.display = "none"
+    }
 }
 
