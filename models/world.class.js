@@ -9,7 +9,10 @@ class World {
     statusBarHealth;
     statusBarCoin;
     statusBarBottle;
+    statusBarEndboss;
+    gameOverPending = false;
     throwableObjects = [];
+
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -18,6 +21,7 @@ class World {
         this.statusBarHealth = new StatusBarHealth();
         this.statusBarCoin = new StatusBarCoins();
         this.statusBarBottle = new StatusBarBottle();
+        this.statusBarEndboss = new StatusBarEndboss();
         this.draw();
         this.setWorld();
         this.run();
@@ -38,6 +42,7 @@ class World {
             if (this.GAME_PAUSED) return;
             this.checkCollisions();
             this.checkThrowObjects();
+            this.checkGameOver();
         }, 1000 / 25);
     }
 
@@ -135,7 +140,11 @@ class World {
             return;
         }
 
-
+        if (GAME_OVER) {
+            this.drawGameOverScreen();
+            requestAnimationFrame(() => this.draw());
+            return;
+        }
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.backgroundObjects);
@@ -144,6 +153,7 @@ class World {
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoin);
         this.addToMap(this.statusBarBottle);
+        this.addToMap(this.statusBarEndboss);
         this.ctx.translate(this.camera_x, 0); // Forwards
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.coins);
@@ -190,14 +200,6 @@ class World {
         this.ctx.restore();
     }
 
-    checkGameOver() {
-        if (this.character.hasDied()) {
-            showRestartButton();
-            return true;
-        }
-        return false;
-    }
-
     showRestartButton() {
         document.getElementById("restart-button").style.display = "block";
     }
@@ -234,7 +236,6 @@ class World {
         this.ctx.restore();
     }
 
-
     showPauseMenu() {
         document.getElementById("pause-menu").style.display = "block";
     }
@@ -243,6 +244,64 @@ class World {
         document.getElementById("pause-menu").style.display = "none";
     }
 
+    showGameOverScreen() {
+        document.getElementById("game-over-screen").style.display = "block";
+    }
+
+    hideGameOverScreen() {
+        document.getElementById("game-over-screen").style.display = "none";
+    }
+
+    checkGameOver() {
+        if (this.character.hasDied && !GAME_OVER && !this.gameOverPending) {
+            this.gameOverPending = true;
+
+            setTimeout(() => {
+                GAME_OVER = true;
+                this.gameOverPending = false;
+
+                this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.pauseCtx.drawImage(this.canvas, 0, 0);
+                this.showGameOverScreen();
+                startgameOverMusic();
+                backgroundMusic.volume = 0;
+            }, 2000);
+        }
+    }
+
+    drawGameOverScreen() {
+        this.ctx.save();
+        this.ctx.filter = "blur(3px)";
+        this.ctx.drawImage(this.pauseCanvas, 0, 0);
+        this.ctx.filter = "none";
+        this.ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = "white";
+        this.ctx.font = "64px Arial";
+        this.ctx.textAlign = "center";
+        this.ctx.restore();
+    }
+
+    resetWorld() {
+        GAME_OVER = false;
+        GAME_PAUSED = false;
+        this.gameOverPending = false;
+        this.hideGameOverScreen();
+        this.hidePauseMenu();
+
+        initLevel();
+        this.level = level1;
+
+        this.character = new Character();
+        this.character.world = this;
+
+        this.camera_x = 0;
+        this.throwableObjects = [];
+
+        gameOverMusic.volume = 0;
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.volume = 0.2;
+    }
 }
 
 

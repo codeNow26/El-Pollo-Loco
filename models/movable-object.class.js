@@ -102,7 +102,6 @@ class MovableObject extends DrawableObject {
         if (this.isAboveGround()) return;
         this.jumpPrepStart = Date.now();
         this.speedY = 20;
-
     }
 
     playJumpAudio() {

@@ -9,11 +9,11 @@ class Character extends MovableObject {
     lastJumpFrameTime = 0;
     jumpFrameDelay = 0;
     walkFrameSpeed = 40;
-
+    sleepFrameDelay = 100;
+    lastSleepFrameTime = 0;
     isPreparingJump = false;
     jumpPrepFrames = 0;
-
-
+    lastActiveTime = 0;
 
     IMAGES_WALKING = [
         "img/2_character_pepe/2_walk/W-21.png",
@@ -51,6 +51,19 @@ class Character extends MovableObject {
         "img/2_character_pepe/4_hurt/H-43.png",
     ];
 
+    IMAGES_SLEEPING = [
+        "img/2_character_pepe/1_idle/long_idle/I-11.png",
+        "img/2_character_pepe/1_idle/long_idle/I-12.png",
+        "img/2_character_pepe/1_idle/long_idle/I-13.png",
+        "img/2_character_pepe/1_idle/long_idle/I-14.png",
+        "img/2_character_pepe/1_idle/long_idle/I-15.png",
+        "img/2_character_pepe/1_idle/long_idle/I-16.png",
+        "img/2_character_pepe/1_idle/long_idle/I-17.png",
+        "img/2_character_pepe/1_idle/long_idle/I-18.png",
+        "img/2_character_pepe/1_idle/long_idle/I-19.png",
+        "img/2_character_pepe/1_idle/long_idle/I-20.png",
+    ];
+
     AUDIO_WALKING = [
         "audio/jute-dh-steps/stepdirt_1.wav",
         "audio/jute-dh-steps/stepdirt_2.wav",
@@ -86,6 +99,7 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_DEAD);
         this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_SLEEPING);
         this.jumpAudio = new Audio();
         this.jumpAudio.volume = 0.6;
         this.walkAudio = new Audio();
@@ -96,8 +110,8 @@ class Character extends MovableObject {
         this.hurtAudio.volume = 0.4;
         this.dieAudio = new Audio("audio/hurt/Die Sound.mp3");
         this.dieAudio.volume = 0.4;
-
         this.lastStepTime = 0;
+        this.lastActiveTime = Date.now();
         this.stepDelay = 300;
         this.animate();
         this.applyGravity();
@@ -121,6 +135,11 @@ class Character extends MovableObject {
 
     animate() {
         setInterval(() => {
+
+            if (!this.noKeyPressed() || this.isAboveGround()) {
+                this.lastActiveTime = Date.now();
+            }
+
             if (!this.isAboveGround() && (this.world.keyboard.SPACE || this.world.keyboard.UP)) {
                 this.jump();
             }
@@ -152,14 +171,16 @@ class Character extends MovableObject {
             else {
                 if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
                     this.animateWalk();
+                } else if (this.noKeyPressed() && !this.isAboveGround()) {
+                    this.sleep();
                 }
             }
         }, 16);
-
     }
 
+
     handleWalkSound() {
-        const now = Date.now();
+        let now = Date.now();
         if (
             (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) &&
             !this.isAboveGround()
@@ -172,14 +193,12 @@ class Character extends MovableObject {
     }
 
     animateWalk() {
+        let now = Date.now();
+        if (now - this.lastWalkFrameTime < this.walkFrameSpeed) return;
 
-    
-    const now = Date.now();
-    if (now - this.lastWalkFrameTime < this.walkFrameSpeed) return;
-
-    this.playAnimation(this.IMAGES_WALKING);
-    this.lastWalkFrameTime = now;
-}
+        this.playAnimation(this.IMAGES_WALKING);
+        this.lastWalkFrameTime = now;
+    }
 
     die() {
         if (this.hasDied) return;
@@ -193,33 +212,43 @@ class Character extends MovableObject {
         this.speedY = 15;
     }
 
+    sleep() {
+        let now = Date.now();
+        if (now - this.lastSleepFrameTime < this.sleepFrameDelay) return;
+        if (now - this.lastActiveTime > 5000) {
+            this.playAnimation(this.IMAGES_SLEEPING);
+            this.lastSleepFrameTime = now;
+        }
+    }
+
     animateJump() {
-        const now = Date.now();
-
+        let now = Date.now();
         if (now - this.jumpPrepStart < 40) {
-
             let prepFrame;
-
             if (now - this.jumpPrepStart < 15) prepFrame = 0;
             else if (now - this.jumpPrepStart < 30) prepFrame = 1;
             else prepFrame = 2;
-
             this.img = this.imageCache[this.IMAGES_JUMPING[prepFrame]];
             return;
         }
-
         let frameIndex;
-
-
-        if (this.speedY > 6) frameIndex = 3;
-        else if (this.speedY > -2) frameIndex = 4;
-        else if (this.speedY > -6) frameIndex = 5;
-        else if (this.speedY > -10) frameIndex = 6;
-        else frameIndex = 7;
-
+        if (this.speedY > 6) {
+            frameIndex = 3;
+        }
+        else if (this.speedY > 0) {
+            frameIndex = 4;
+        }
+        else if (this.speedY > -10) {
+            frameIndex = 6;
+        }
+        else if (this.speedY > -18) {
+            frameIndex = 7;
+        }
+        else {
+            frameIndex = 8;
+        }
         this.img = this.imageCache[this.IMAGES_JUMPING[frameIndex]];
     }
-
 
     useBottle(maxBottles) {
         if (this.bottle <= 0) return false;
@@ -227,4 +256,17 @@ class Character extends MovableObject {
         this.bottle--;
         return (this.bottle / maxBottles) * 100;
     }
+
+
+    noKeyPressed() {
+        return !(
+            this.world.keyboard.LEFT ||
+            this.world.keyboard.RIGHT ||
+            this.world.keyboard.UP ||
+            this.world.keyboard.DOWN ||
+            this.world.keyboard.SPACE ||
+            this.world.keyboard.E
+        );
+    }
+
 }

@@ -3,15 +3,8 @@ let world;
 let backgroundMusic;
 let menuMusic;
 let GAME_PAUSED = false;
+let GAME_OVER = false;
 let keyboard = new Keyboard();
-
-
-
-
-
-
-
-
 
 function init() {
     canvas = document.getElementById("canvas");
@@ -79,6 +72,7 @@ function startGame() {
     document.getElementById("splash-screen").style.display = "none";
     document.getElementById("start-screen").style.display = "none";
     document.getElementById("canvas").style.display = "block";
+    initLevel();
     init();
     startBackgroundMusic();
 }
@@ -97,8 +91,15 @@ function startMenuMusic() {
     menuMusic.play();
 }
 
+function startgameOverMusic() {
+    gameOverMusic = new Audio("audio/Background Music/El Pollo Loco Game Over Music.mp3");
+    gameOverMusic.loop = true;
+    gameOverMusic.volume = 0.2;
+    gameOverMusic.play();
+}
+
 function restartGame() {
-    location.reload();
+    world.resetWorld();
 }
 
 function continueGame() {
@@ -123,12 +124,47 @@ function enterFullscreen() {
 
 function exitFullscreen() {
     document.getElementById("fullscreen-exit-button").style.display = "none";
-     document.getElementById("fullscreen-button").style.display = "block";
+    document.getElementById("fullscreen-button").style.display = "block";
 
     if (document.exitFullscreen) {
         document.exitFullscreen();
     } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen();
+    } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
     }
+}
+
+function toggleControlsScreen() {
+    const showControls = document.getElementById("controls-screen");
+
+    if (showControls.style.display === "block") {
+        showControls.style.display = "none";
+        document.getElementById("start-button").style.display = "block"
+    } else {
+        showControls.style.display = "block";
+        document.getElementById("start-button").style.display = "none"
+    }
+}
+
+   function backToTitleScreen() {
+
+    GAME_OVER = false;
+    GAME_PAUSED = false;
+
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+
+    gameOverMusic.pause();
+    gameOverMusic.currentTime = 0;
+
+
+    document.getElementById("pause-menu").style.display = "none";
+    document.getElementById("game-over-screen").style.display = "none";
+
+    document.getElementById("canvas").style.display = "none";
+
+    document.getElementById("start-screen").style.display = "block";
+    document.getElementById("splash-screen").style.display = "block";
 }
 
