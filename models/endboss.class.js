@@ -86,7 +86,7 @@ class Endboss extends MovableObject {
                 this.playAnimationOnce(this.IMAGES_DEAD);
                 return;
             }
-            if (!this.hadDied && this.isHurt()) {
+            if (!this.hasDied && this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
             }
         }, 120);
@@ -121,7 +121,6 @@ class Endboss extends MovableObject {
 
     hurt() {
         if (this.hasDied) return;
-        console.log(this.energy)
         let timepassed = new Date().getTime() - this.lastHit;
         timepassed = timepassed / 1000;
 

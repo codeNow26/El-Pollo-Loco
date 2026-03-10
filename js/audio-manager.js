@@ -22,10 +22,15 @@ function toggleMute() {
 
     localStorage.setItem("soundMuted", SOUND_MUTED);
 
+     if (world && world.character) {
+        world.character.snoreAudio.muted = SOUND_MUTED;
+    }
+
     if (backgroundMusic) {
         backgroundMusic.muted = SOUND_MUTED;
 
         if (SOUND_MUTED) {
+            
             backgroundMusic.volume = 0.0;
         } else {
             backgroundMusic.volume = 0.2;

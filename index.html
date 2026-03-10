@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="./img/2_character_pepe/1_idle/idle/I-1.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="responsive.css">
     <title>Document</title>
@@ -39,6 +40,9 @@
     <div class="center">
         <h1 class="game-title">El Pollo Loco</h1>
         <div id="fullscreen" class="game-wrapper">
+            <div id="border-screen-wrapper">
+                <img id="border-screen" class="border-screen" src="./img/start-screen/Borderscreen.png">
+            </div>
             <button id="control-cancel-button" onclick="toggleControlsScreen()">X</button>
             <div id="controls-wrapper" class="controls-wrapper">
                 <img src="./img/start-screen/Impressum.png" id="impressum" onclick="toggleImpressumScreen()">
@@ -75,8 +79,15 @@
                     src="./img/end-screen/Restart Button.png">
                 <img id="game-over-home-btn" onclick="backToTitleScreen()" src="./img/start-screen/home-button.png">
             </div>
+
+            <div id="game-won-screen">
+                <img id="game-won-img" src="./img/You won, you lost/You won A.png">
+                <img id="game-over-restart-btn" class="restart-button" onclick="restartGame()"
+                    src="./img/end-screen/Restart Button.png">
+                <img id="game-over-home-btn" onclick="backToTitleScreen()" src="./img/start-screen/home-button.png">
+            </div>
+
             <div id="splash-screen">
-                <img id="border-screen" class="border-screen" src="./img/start-screen/Borderscreen.png">
                 <img src="./img/start-screen/start-button.png" onclick="startGame()" id="start-button" value="Start" />
             </div>
         </div>

@@ -11,6 +11,7 @@ class World {
     statusBarBottle;
     statusBarEndboss;
     gameOverPending = false;
+    winPending = false;
     throwableObjects = [];
 
 
@@ -25,8 +26,8 @@ class World {
         this.draw();
         this.setWorld();
         this.run();
-
-
+        this.endboss = this.level.enemies.find(e => e instanceof Endboss);
+        this.lastBottleThrow = 0;
         this.pauseCanvas = document.createElement("canvas");
         this.pauseCanvas.width = this.canvas.width;
         this.pauseCanvas.height = this.canvas.height;
@@ -43,18 +44,22 @@ class World {
             this.checkCollisions();
             this.checkThrowObjects();
             this.checkGameOver();
+            this.checkWonGame();
         }, 1000 / 25);
     }
 
     checkThrowObjects() {
-        if (this.keyboard.E) {
+        let now = Date.now();
+        if (this.keyboard.E && now - this.lastBottleThrow > 1000) {
+            this.character.stopSnoring();
+            this.character.lastActiveTime = now;
             const percentage = this.character.useBottle(this.level.maxBottles);
-
             if (percentage !== false) {
                 this.throwableObjects.push(
                     new ThrowableObject(this.character.x + 100, this.character.y + 100)
                 );
                 this.statusBarBottle.setPercentage(percentage);
+                this.lastBottleThrow = now;
             }
             this.keyboard.E = false;
         }
@@ -160,7 +165,9 @@ class World {
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoin);
         this.addToMap(this.statusBarBottle);
-        this.addToMap(this.statusBarEndboss);
+        if (this.endboss && this.endboss.hadFirstContact) {
+            this.addToMap(this.statusBarEndboss);
+        }
         this.ctx.translate(this.camera_x, 0); // Forwards
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.coins);
@@ -225,6 +232,7 @@ class World {
 
     pauseGame() {
         GAME_PAUSED = true;
+        this.character.stopSnoring();
         this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.pauseCtx.drawImage(this.canvas, 0, 0);
         backgroundMusic.volume = 0.05;
@@ -257,6 +265,33 @@ class World {
 
     hideGameOverScreen() {
         document.getElementById("game-over-screen").style.display = "none";
+    }
+
+    showGameWonScreen() {
+        document.getElementById("game-won-screen").style.display = "block";
+    }
+
+    hideGameWonScreen() {
+        document.getElementById("game-won-screen").style.display = "none";
+    }
+
+    checkWonGame() {
+        this.level.enemies.forEach((enemy) => {
+
+            if (enemy instanceof Endboss && enemy.hasDied && !GAME_OVER && !this.winPending) {
+                this.winPending = true;
+                setTimeout(() => {
+                    GAME_OVER = true;
+                    this.winPending = false;
+
+                    backgroundMusic.volume = 0;
+                    this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.pauseCtx.drawImage(this.canvas, 0, 0);
+                    this.showGameWonScreen();
+                    startGameWonMusic();
+                }, 1400);
+            }
+        });
     }
 
     checkGameOver() {
@@ -294,20 +329,31 @@ class World {
         GAME_OVER = false;
         GAME_PAUSED = false;
         this.gameOverPending = false;
+        this.winPending = false;
         this.hideGameOverScreen();
+        this.hideGameWonScreen();
         this.hidePauseMenu();
 
         initLevel();
         this.level = level1;
-
         this.character = new Character();
         this.character.world = this;
-
         this.camera_x = 0;
         this.throwableObjects = [];
 
+        if (gameOverMusic) {
+            gameOverMusic.pause();
+            gameOverMusic.currentTime = 0;
+        }
+
+        if (gameWonMusic) {
+            gameWonMusic.pause();
+            gameWonMusic.currentTime = 0;
+        }
+
         backgroundMusic.currentTime = 0;
         backgroundMusic.volume = 0.2;
+
         this.run();
     }
 }

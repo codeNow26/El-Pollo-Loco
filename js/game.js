@@ -1,6 +1,8 @@
 let canvas;
 let world;
 let backgroundMusic;
+let gameOverMusic;
+let gameWonMusic;
 let menuMusic;
 let GAME_PAUSED = false;
 let GAME_OVER = false;
@@ -140,6 +142,12 @@ function startgameOverMusic() {
     gameOverMusic.play();
 }
 
+function startGameWonMusic() {
+    gameWonMusic = new Audio("audio/Background Music/El Pollo Loco Game Won Music.mp3")
+    gameWonMusic.volume = 0.2;
+    gameWonMusic.play();
+}
+
 function restartGame() {
     world.resetWorld();
 }
@@ -184,7 +192,10 @@ function toggleControlsScreen() {
         controlIcons.style.display = "flex";
         document.getElementById("start-button").style.display = "block"
         GAME_PAUSED = false;
-        backgroundMusic.volume = 0.2;
+        if (backgroundMusic) {
+            backgroundMusic.volume = 0.2;
+        }
+
 
     } else {
         showControls.style.display = "block";
@@ -200,17 +211,31 @@ function toggleControlsScreen() {
 
 function backToTitleScreen() {
     clearAllIntervals();
+    showImpressum();
     GAME_OVER = false;
     GAME_PAUSED = false;
-    backgroundMusic.pause();
-    backgroundMusic.currentTime = 0;
-    gameOverMusic.pause();
-    gameOverMusic.currentTime = 0;
+
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+    }
+
+    if (gameOverMusic) {
+        gameOverMusic.pause();
+        gameOverMusic.currentTime = 0;
+    }
+
+    if (gameWonMusic) {
+        gameWonMusic.pause();
+        gameWonMusic.currentTime = 0;
+    }
+
     document.getElementById("pause-menu").style.display = "none";
     document.getElementById("game-over-screen").style.display = "none";
+    document.getElementById("game-won-screen").style.display = "none";
     document.getElementById("canvas").style.display = "none";
     document.getElementById("start-screen").style.display = "block";
-    document.getElementById("splash-screen").style.display = "block";
+    document.getElementById("splash-screen").style.display = "flex";
 }
 
 function toggleImpressumScreen() {
@@ -231,7 +256,11 @@ function toggleImpressumScreen() {
 }
 
 function hideImpressum() {
-    let impressum = document.getElementById("impressum").classList.add("hidden");
+    document.getElementById("impressum").classList.add("hidden");
+}
+
+function showImpressum() {
+    document.getElementById("impressum").classList.remove("hidden");
 }
 
 function checkOrientation() {

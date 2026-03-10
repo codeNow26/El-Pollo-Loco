@@ -15,6 +15,8 @@ class Character extends MovableObject {
     jumpPrepFrames = 0;
     lastActiveTime = 0;
     lastIdleFrameTime = 0;
+    lastDeathFrameTime = 0;
+    deathFrameDelay = 120;
 
     IMAGES_IDLE = [
         "img/2_character_pepe/1_idle/idle/I-1.png",
@@ -152,8 +154,9 @@ class Character extends MovableObject {
     }
 
     animate() {
-        setInterval(() => {
 
+        setInterval(() => {
+             if (GAME_OVER || GAME_PAUSED) return;
             if (!this.noKeyPressed() || this.isAboveGround()) {
                 this.lastActiveTime = Date.now();
             }
@@ -177,29 +180,33 @@ class Character extends MovableObject {
 
 
         setInterval(() => {
+            if (GAME_OVER || GAME_PAUSED) return;
             if (this.hasDied) {
-                this.playAnimation(this.IMAGES_DEAD);
-                this.die();
+                let now = Date.now();
+                if (now - this.lastDeathFrameTime > this.deathFrameDelay) {
+                    this.playAnimation(this.IMAGES_DEAD);
+                    this.lastDeathFrameTime = now;
+                }
+                return;
             } else if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
             }
             else if (this.isAboveGround() || this.isPreparingJump) {
                 this.animateJump();
             } else {
-        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-            this.animateWalk();
-
-        } else if (this.noKeyPressed()) {
-            this.animateIdle();
-
-        } else {
-            this.sleep();
-        }
+                if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+                    this.stopSnoring();
+                    this.animateWalk();
+                } else if (this.noKeyPressed() && !this.isAboveGround()) {
+                    if (Date.now() - this.lastActiveTime > 10000) {
+                        this.sleep();
+                    } else {
+                        this.animateIdle();
+                    }
+                }
+            }
+        }, 16);
     }
-
-}, 16);
-    }
-
 
     handleWalkSound() {
         let now = Date.now();
@@ -243,7 +250,7 @@ class Character extends MovableObject {
     sleep() {
         let now = Date.now();
         if (now - this.lastSleepFrameTime < this.sleepFrameDelay) return;
-        if (now - this.lastActiveTime > 5000) {
+        if (now - this.lastActiveTime > 10000) {
             this.playAnimation(this.IMAGES_SLEEPING);
             if (this.snoreAudio.paused) {
                 this.snoreAudio.play();

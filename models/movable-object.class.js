@@ -117,9 +117,10 @@ class MovableObject extends DrawableObject {
 
     playJumpAudio() {
         const randomIndex = Math.floor(Math.random() * this.AUDIO_JUMP.length);
+        
         this.jumpAudio.src = this.AUDIO_JUMP[randomIndex];
         this.jumpAudio.playbackRate = this.speed / 6;
         this.jumpAudio.currentTime = 0;
-        this.jumpAudio.play();
+        this.jumpAudio.play().catch(() => {});;
     }
 }
