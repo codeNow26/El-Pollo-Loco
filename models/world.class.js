@@ -1,5 +1,4 @@
 class World {
-
     character = new Character();
     level = level1;
     canvas;
@@ -14,24 +13,27 @@ class World {
     winPending = false;
     throwableObjects = [];
 
-
     constructor(canvas, keyboard) {
-        this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
         this.keyboard = keyboard;
+        
         this.statusBarHealth = new StatusBarHealth();
         this.statusBarCoin = new StatusBarCoins();
         this.statusBarBottle = new StatusBarBottle();
         this.statusBarEndboss = new StatusBarEndboss();
-        this.draw();
-        this.setWorld();
-        this.run();
-        this.endboss = this.level.enemies.find(e => e instanceof Endboss);
-        this.lastBottleThrow = 0;
+
         this.pauseCanvas = document.createElement("canvas");
         this.pauseCanvas.width = this.canvas.width;
         this.pauseCanvas.height = this.canvas.height;
         this.pauseCtx = this.pauseCanvas.getContext("2d");
+
+        this.lastBottleThrow = 0;
+        this.endboss = this.level.enemies.find(e => e instanceof Endboss);
+
+        this.draw();
+        this.setWorld();
+        this.run();
     }
 
     setWorld() {
@@ -49,20 +51,30 @@ class World {
     }
 
     checkThrowObjects() {
-        let now = Date.now();
-        if (this.keyboard.E && now - this.lastBottleThrow > 1000) {
-            this.character.stopSnoring();
-            this.character.lastActiveTime = now;
-            const percentage = this.character.useBottle(this.level.maxBottles);
-            if (percentage !== false) {
-                this.throwableObjects.push(
-                    new ThrowableObject(this.character.x + 100, this.character.y + 100)
-                );
-                this.statusBarBottle.setPercentage(percentage);
-                this.lastBottleThrow = now;
-            }
-            this.keyboard.E = false;
+        if (this.canThrowBottle()) {
+            this.throwBottle();
         }
+    }
+
+    canThrowBottle() {
+        let now = Date.now();
+        return this.keyboard.E &&
+            now - this.lastBottleThrow > 1000;
+    }
+
+    throwBottle() {
+        let now = Date.now();
+        this.character.stopSnoring();
+        this.character.lastActiveTime = now;
+        const percentage = this.character.useBottle(this.level.maxBottles);
+        if (percentage !== false) {
+            this.throwableObjects.push(
+                new ThrowableObject(this.character.x + 100, this.character.y + 100)
+            );
+            this.statusBarBottle.setPercentage(percentage);
+            this.lastBottleThrow = now;
+        }
+        this.keyboard.E = false;
     }
 
     checkCollisions() {
@@ -76,34 +88,52 @@ class World {
         this.throwableObjects.forEach(bottle => {
             this.level.enemies.forEach(enemy => {
                 if (!enemy.hasDied && bottle.checkImpact(enemy)) {
-
-                    if (enemy instanceof Endboss) {
-                        const oldEnergy = enemy.energy;
-                        enemy.hurt();
-                        if (enemy.energy !== oldEnergy) {
-                            this.statusBarEndboss.setPercentage(enemy.energy);
-                        }
-                    } else
-                        enemy.die();
+                    this.handleBottleHit(enemy);
                 }
             });
         });
     }
 
+    handleBottleHit(enemy) {
+        if (enemy instanceof Endboss) {
+            this.damageEndboss(enemy);
+        } else {
+            enemy.die();
+        }
+    }
+
+    damageEndboss(enemy) {
+        const oldEnergy = enemy.energy;
+
+        enemy.hurt();
+
+        if (enemy.energy !== oldEnergy) {
+            this.statusBarEndboss.setPercentage(enemy.energy);
+        }
+    }
+
     checkEnemyCollisions() {
-        this.level.enemies.forEach((enemy) => {
+        this.level.enemies.forEach(enemy => {
             if (enemy.hasDied) return;
             if (this.character.isCollidingFromTop(enemy)) {
-                enemy.die();
-                this.character.jumpAfterKill();
+                this.handleJumpOnEnemy(enemy);
                 return;
             }
             if (this.character.isColliding(enemy) && !this.character.isHurt()) {
-                this.character.hit();
-                this.checkHitDirection(enemy);
-                this.statusBarHealth.setPercentage(this.character.energy);
+                this.handleEnemyHit(enemy);
             }
         });
+    }
+
+    handleJumpOnEnemy(enemy) {
+        enemy.die();
+        this.character.jumpAfterKill();
+    }
+
+    handleEnemyHit(enemy) {
+        this.character.hit();
+        this.checkHitDirection(enemy);
+        this.statusBarHealth.setPercentage(this.character.energy);
     }
 
     checkHitDirection(enemy) {
@@ -135,10 +165,8 @@ class World {
             if (!bottle.collected && this.character.isColliding(bottle)) {
                 bottle.collect();
                 this.character.bottle++;
-
                 const percentage =
                     (this.character.bottle / this.level.maxBottles) * 100;
-
                 this.statusBarBottle.setPercentage(percentage);
             }
             this.level.bottle = this.level.bottle.filter(bottle => !bottle.collected);
@@ -151,24 +179,40 @@ class World {
             requestAnimationFrame(() => this.draw());
             return;
         }
-
         if (GAME_OVER) {
             this.drawGameOverScreen();
             requestAnimationFrame(() => this.draw());
             return;
         }
+        this.clearCanvas();
+        this.drawBackground();
+        this.drawUI();
+        this.drawGameObjects();
+        requestAnimationFrame(() => this.draw());
+    }
+
+    clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    drawBackground() {
         this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds);
-        this.ctx.translate(-this.camera_x, 0); // Back
+        this.ctx.translate(-this.camera_x, 0);
+    }
+
+    drawUI() {
         this.addToMap(this.statusBarHealth);
         this.addToMap(this.statusBarCoin);
         this.addToMap(this.statusBarBottle);
         if (this.endboss && this.endboss.hadFirstContact) {
             this.addToMap(this.statusBarEndboss);
         }
-        this.ctx.translate(this.camera_x, 0); // Forwards
+    }
+
+    drawGameObjects() {
+        this.ctx.translate(this.camera_x, 0);
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.level.bottle);
@@ -176,9 +220,6 @@ class World {
         this.addObjectsToMap(this.throwableObjects);
         this.character.applyKnockback();
         this.ctx.translate(-this.camera_x, 0);
-
-        requestAnimationFrame(() => this.draw()
-        );
     }
 
     addObjectsToMap(objects) {
@@ -193,13 +234,9 @@ class World {
         }
         mo.draw(this.ctx);
         mo.drawFrame(this.ctx);
-
         if (mo.otherDirection) {
             this.flipImageBack(mo)
         }
-    }
-
-    updateBackgrounds() {
     }
 
     flipImage(mo) {
@@ -277,38 +314,53 @@ class World {
 
     checkWonGame() {
         this.level.enemies.forEach((enemy) => {
-
-            if (enemy instanceof Endboss && enemy.hasDied && !GAME_OVER && !this.winPending) {
-                this.winPending = true;
-                setTimeout(() => {
-                    GAME_OVER = true;
-                    this.winPending = false;
-
-                    backgroundMusic.volume = 0;
-                    this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                    this.pauseCtx.drawImage(this.canvas, 0, 0);
-                    this.showGameWonScreen();
-                    startGameWonMusic();
-                }, 1400);
+            if (this.isEndbossDead(enemy)) {
+                this.wonGame();
             }
         });
     }
 
+    isEndbossDead(enemy) {
+        return enemy instanceof Endboss &&
+            enemy.hasDied &&
+            !GAME_OVER &&
+            !this.winPending;
+    }
+
+    wonGame() {
+        this.winPending = true;
+        setTimeout(() => {
+            GAME_OVER = true;
+            this.winPending = false;
+            backgroundMusic.volume = 0;
+            this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.pauseCtx.drawImage(this.canvas, 0, 0);
+            this.showGameWonScreen();
+            startGameWonMusic();
+        }, 1400);
+    }
+
     checkGameOver() {
-        if (this.character.hasDied && !GAME_OVER && !this.gameOverPending) {
-            this.gameOverPending = true;
-
-            setTimeout(() => {
-                GAME_OVER = true;
-                this.gameOverPending = false;
-
-                this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.pauseCtx.drawImage(this.canvas, 0, 0);
-                this.showGameOverScreen();
-                startgameOverMusic();
-                backgroundMusic.volume = 0;
-            }, 2000);
+        if (this.triggerGameOver()) {
+            this.gameOver();
         }
+    }
+
+    triggerGameOver() {
+        return this.character.hasDied && !GAME_OVER && !this.gameOverPending;
+    }
+
+    gameOver() {
+        this.gameOverPending = true;
+        setTimeout(() => {
+            GAME_OVER = true;
+            this.gameOverPending = false;
+            this.pauseCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.pauseCtx.drawImage(this.canvas, 0, 0);
+            this.showGameOverScreen();
+            startgameOverMusic();
+            backgroundMusic.volume = 0;
+        }, 2000);
     }
 
     drawGameOverScreen() {
@@ -326,35 +378,46 @@ class World {
 
     resetWorld() {
         clearAllIntervals();
+        this.resetGameState();
+        this.resetUI();
+        this.resetLevel();
+        this.resetMusic();
+        this.run();
+    }
+
+    resetGameState() {
         GAME_OVER = false;
         GAME_PAUSED = false;
         this.gameOverPending = false;
         this.winPending = false;
+        this.camera_x = 0;
+        this.throwableObjects = [];
+    }
+
+    resetUI() {
         this.hideGameOverScreen();
         this.hideGameWonScreen();
         this.hidePauseMenu();
+    }
 
+    resetLevel() {
         initLevel();
         this.level = level1;
         this.character = new Character();
         this.character.world = this;
-        this.camera_x = 0;
-        this.throwableObjects = [];
+    }
 
+    resetMusic() {
         if (gameOverMusic) {
             gameOverMusic.pause();
             gameOverMusic.currentTime = 0;
         }
-
         if (gameWonMusic) {
             gameWonMusic.pause();
             gameWonMusic.currentTime = 0;
         }
-
         backgroundMusic.currentTime = 0;
         backgroundMusic.volume = 0.2;
-
-        this.run();
     }
 }
 

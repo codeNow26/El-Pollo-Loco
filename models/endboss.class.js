@@ -121,18 +121,15 @@ class Endboss extends MovableObject {
 
     hurt() {
         if (this.hasDied) return;
-        let timepassed = new Date().getTime() - this.lastHit;
-        timepassed = timepassed / 1000;
-
+        let timepassed = (Date.now() - this.lastHit) / 1000;
         if (timepassed < 1) return;
-
+        this.lastHit = Date.now();
         if (this.energy - 20 <= 0) {
             this.die();
             return;
         }
         this.energy -= 20;
-        this.x -= 20;
-        this.lastHit = new Date().getTime();
+        this.x += 60;
         this.playRandomEndbossHurtSound();
     }
 
@@ -147,6 +144,7 @@ class Endboss extends MovableObject {
     playRandomEndbossHurtSound() {
         const randomIndex = Math.floor(Math.random() * this.AUDIO_HURT.length);
         this.endbossHurtAudio.src = this.AUDIO_HURT[randomIndex];
+        this.endbossHurtAudio.currentTime = 0;
         this.endbossHurtAudio.play();
     }
 }

@@ -154,58 +154,81 @@ class Character extends MovableObject {
     }
 
     animate() {
+        this.startMovement();
+        this.startAnimation();
+    }
 
+    startMovement() {
         setInterval(() => {
-             if (GAME_OVER || GAME_PAUSED) return;
+            if (GAME_OVER || GAME_PAUSED) return;
             if (!this.noKeyPressed() || this.isAboveGround()) {
                 this.lastActiveTime = Date.now();
             }
-
-            if (!this.isAboveGround() && (this.world.keyboard.SPACE || this.world.keyboard.UP)) {
-                this.jump();
-            }
-
-            if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-                this.moveRight();
-                this.otherDirection = false;
-            }
-
-            if (this.world.keyboard.LEFT && this.x > 0) {
-                this.moveLeft();
-                this.otherDirection = true;
-            }
+            this.handleJumpInput();
+            this.handleMovementInput();
             this.world.camera_x = -this.x + 100;
             this.handleWalkSound();
         }, 1000 / 60);
+    }
 
+    handleJumpInput() {
+        if (!this.isAboveGround() && (this.world.keyboard.SPACE || this.world.keyboard.UP)) {
+            this.jump();
+        }
+    }
 
+    handleMovementInput() {
+        if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
+            this.moveRight();
+            this.otherDirection = false;
+        }
+        if (this.world.keyboard.LEFT && this.x > 0) {
+            this.moveLeft();
+            this.otherDirection = true;
+        }
+    }
+
+    startAnimation() {
         setInterval(() => {
             if (GAME_OVER || GAME_PAUSED) return;
-            if (this.hasDied) {
-                let now = Date.now();
-                if (now - this.lastDeathFrameTime > this.deathFrameDelay) {
-                    this.playAnimation(this.IMAGES_DEAD);
-                    this.lastDeathFrameTime = now;
-                }
-                return;
-            } else if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
-            }
-            else if (this.isAboveGround() || this.isPreparingJump) {
-                this.animateJump();
-            } else {
-                if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-                    this.stopSnoring();
-                    this.animateWalk();
-                } else if (this.noKeyPressed() && !this.isAboveGround()) {
-                    if (Date.now() - this.lastActiveTime > 10000) {
-                        this.sleep();
-                    } else {
-                        this.animateIdle();
-                    }
-                }
-            }
+            this.updateAnimationState();
         }, 16);
+    }
+
+    updateAnimationState() {
+        if (this.hasDied) {
+            this.animateDeath();
+            return;
+        }
+        if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+            return;
+        }
+        if (this.isJumping()) {
+            this.animateJump();
+            return;
+        }
+        this.handleGroundAnimations();
+    }
+
+    isJumping() {
+        return this.isAboveGround() || this.isPreparingJump;
+    }
+
+    handleGroundAnimations() {
+        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+            this.stopSnoring();
+            this.animateWalk();
+            return;
+        }
+
+        if (this.noKeyPressed()) {
+            if (Date.now() - this.lastActiveTime > 10000) {
+                this.sleep();
+            } else {
+                this.animateIdle();
+            }
+        }
     }
 
     handleWalkSound() {
@@ -267,32 +290,43 @@ class Character extends MovableObject {
     }
 
     animateJump() {
-        let now = Date.now();
-        if (now - this.jumpPrepStart < 40) {
-            let prepFrame;
-            if (now - this.jumpPrepStart < 15) prepFrame = 0;
-            else if (now - this.jumpPrepStart < 30) prepFrame = 1;
-            else prepFrame = 2;
-            this.img = this.imageCache[this.IMAGES_JUMPING[prepFrame]];
+        if (this.isJumpPreparation()) {
+            this.playJumpPrepFrame();
             return;
         }
-        let frameIndex;
+        this.playJumpAirFrame();
+    }
+
+    isJumpPreparation() {
+        return Date.now() - this.jumpStart < 40;
+    }
+
+    playJumpPrepFrame() {
+        let now = Date.now();
+        let frame;
+        if (now - this.jumpStart < 15) {
+            frame = 0;
+        } else if (now - this.jumpStart < 30) {
+            frame = 1;
+        } else {
+            frame = 2;
+        }
+        this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
+    }
+
+    playJumpAirFrame() {
+        let frame;
         if (this.speedY > 6) {
-            frameIndex = 3;
-        }
-        else if (this.speedY > 0) {
-            frameIndex = 4;
-        }
-        else if (this.speedY > -10) {
-            frameIndex = 6;
-        }
-        else if (this.speedY > -18) {
-            frameIndex = 7;
-        }
-        else {
-            frameIndex = 8;
-        }
-        this.img = this.imageCache[this.IMAGES_JUMPING[frameIndex]];
+            frame = 3;
+        } else if (this.speedY > 0) {
+            frame = 4;
+        } else if (this.speedY > -10) {
+            frame = 6;
+        } else if (this.speedY > -18) {
+            frame = 7;
+        } else {
+            frame = 8;
+        } this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
     }
 
     useBottle(maxBottles) {

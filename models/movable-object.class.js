@@ -70,8 +70,8 @@ class MovableObject extends DrawableObject {
     }
 
     isHurt() {
-        let timepassed = new Date().getTime() - this.lastHit; // difference in ms
-        timepassed = timepassed / 1000; // difference in s
+        let timepassed = new Date().getTime() - this.lastHit;
+        timepassed = timepassed / 1000; 
         return timepassed < 1;
     }
 
@@ -97,15 +97,15 @@ class MovableObject extends DrawableObject {
     }
 
     playAnimationOnce(images) {
-    let i = 0;
-    const interval = setInterval(() => {
-        this.img = this.imageCache[images[i]];
-        i++;
-        if (i >= images.length) {
-            clearInterval(interval);
-        }
-    }, 150);
-}
+        let i = 0;
+        const interval = setInterval(() => {
+            this.img = this.imageCache[images[i]];
+            i++;
+            if (i >= images.length) {
+                clearInterval(interval);
+            }
+        }, 150);
+    }
 
     jump() {
         if (GAME_PAUSED) return;
@@ -117,10 +117,9 @@ class MovableObject extends DrawableObject {
 
     playJumpAudio() {
         const randomIndex = Math.floor(Math.random() * this.AUDIO_JUMP.length);
-        
         this.jumpAudio.src = this.AUDIO_JUMP[randomIndex];
         this.jumpAudio.playbackRate = this.speed / 6;
         this.jumpAudio.currentTime = 0;
-        this.jumpAudio.play().catch(() => {});;
+        this.jumpAudio.play().catch(() => { });
     }
 }

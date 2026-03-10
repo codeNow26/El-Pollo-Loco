@@ -22,7 +22,7 @@ class ThrowableObject extends MovableObject {
         this.y = y;
         this.width = 50;
         this.height = 50;
-        this.imageCache = [];
+
         this.currentImage = 0;
         this.loadImages(this.IMAGES_SALSA_BOTTLE);
         this.splashAudio = new Audio("audio/Bottle/splashBottle.mp3");
@@ -31,26 +31,14 @@ class ThrowableObject extends MovableObject {
         this.throw();
     }
 
-    animate() {
-        setInterval(() => {
-            this.playAnimation(this.IMAGES_SALSA_BOTTLE);
-        }, 100);
-    }
-
     throw() {
         this.speedY = 10;
         this.applyGravity();
         this.throwInterval = setInterval(() => {
-                        if (GAME_PAUSED) return;
+            if (GAME_PAUSED) return;
             if (this.isBroken) return;
             this.x += 10;
         }, 25);
-    }
-
-    splash() {
-        this.isBroken = true;
-        this.currentImage = 0;
-        this.loadImage(this.IMAGES_SALSA_BOTTLE_SPLASH)
     }
 
     animate() {
@@ -62,9 +50,17 @@ class ThrowableObject extends MovableObject {
 
     splash() {
         this.isBroken = true;
+        this.stopMovement();
+        this.playSplashAnimation();
+    }
+
+    stopMovement() {
         this.speedY = 0;
         clearInterval(this.throwInterval);
         clearInterval(this.rotationInterval);
+    }
+
+    playSplashAnimation() {
         this.loadImages(this.IMAGES_SALSA_BOTTLE_SPLASH);
         this.splashAudio.play();
         this.currentImage = 0;

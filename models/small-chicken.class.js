@@ -21,7 +21,7 @@ class SmallChicken extends MovableObject {
     ]
 
     constructor(x) {
-        super().loadImage('./img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
+        super().loadImage('img/3_enemies_chicken/chicken_small/1_walk/1_w.png');
         this.loadImages(this.IMAGES_WALKING);
         this.loadImage(this.IMAGE_DEAD);
         this.speed = 0.15 + Math.random() * 0.25;

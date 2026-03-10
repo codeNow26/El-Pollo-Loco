@@ -10,10 +10,7 @@ class Bottle extends MovableObject {
 
         this.loadImage('img/6_salsa_bottle/1_salsa_bottle_on_ground.png');
         this.otherDirection = false;
-
-        setInterval(() => {
-            this.otherDirection = !this.otherDirection;
-        }, 500);
+        this.flipAnimation();
 
         this.bottleAudio = new Audio("audio/Bottle/pickupBottle.wav")
         this.bottleAudio.volume = 0.3;
@@ -23,6 +20,12 @@ class Bottle extends MovableObject {
     collect() {
         this.collected = true;
         this.bottleAudio.play();
+    }
+
+    flipAnimation() {
+        this.flipInterval = setInterval(() => {
+            this.otherDirection = !this.otherDirection;
+        }, 500);
     }
 
 }
