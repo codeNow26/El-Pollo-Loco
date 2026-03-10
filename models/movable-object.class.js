@@ -39,7 +39,6 @@ class MovableObject extends DrawableObject {
             this.isColliding(enemy) &&
             this.speedY <= 0 &&
             characterBottom <= enemyTop + 20
-
         );
     }
 
@@ -81,6 +80,7 @@ class MovableObject extends DrawableObject {
     }
 
     moveRight() {
+        if (GAME_PAUSED) return;
         this.x += this.speed;
     }
 
@@ -95,6 +95,17 @@ class MovableObject extends DrawableObject {
         this.img = this.imageCache[path];
         this.currentImage++;
     }
+
+    playAnimationOnce(images) {
+    let i = 0;
+    const interval = setInterval(() => {
+        this.img = this.imageCache[images[i]];
+        i++;
+        if (i >= images.length) {
+            clearInterval(interval);
+        }
+    }, 150);
+}
 
     jump() {
         if (GAME_PAUSED) return;

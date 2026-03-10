@@ -5,10 +5,32 @@ let menuMusic;
 let GAME_PAUSED = false;
 let GAME_OVER = false;
 let keyboard = new Keyboard();
+let intervalIds = [];
+const originalSetInterval = window.setInterval;
+
+
+window.setInterval = function (fn, time) {
+    const id = originalSetInterval(fn, time);
+    intervalIds.push(id);
+    return id;
+};
+
+function clearAllIntervals() {
+    intervalIds.forEach(id => clearInterval(id));
+    intervalIds = [];
+}
 
 function init() {
     canvas = document.getElementById("canvas");
     world = new World(canvas, keyboard)
+
+    if (window.innerHeight > window.innerWidth) {
+        rotateCanvas();
+    }
+
+    hideImpressum();
+    updateMuteIcon();
+    setupMobileControls();
 
     window.addEventListener("keydown", (e) => {
         if (e.code == "KeyA" || e.code === "ArrowLeft") {
@@ -63,9 +85,29 @@ function init() {
         }
         if (e.code == "KeyE") {
             keyboard.E = false;
-
         }
     });
+}
+
+function setupMobileControls() {
+    const left = document.getElementById("btn-left");
+    const right = document.getElementById("btn-right");
+    const jump = document.getElementById("btn-jump");
+    const throwBtn = document.getElementById("btn-throw");
+    left.addEventListener("touchstart", () => keyboard.LEFT = true);
+    left.addEventListener("touchend", () => keyboard.LEFT = false);
+    right.addEventListener("touchstart", () => keyboard.RIGHT = true);
+    right.addEventListener("touchend", () => keyboard.RIGHT = false);
+    jump.addEventListener("touchstart", () => keyboard.UP = true);
+    jump.addEventListener("touchend", () => keyboard.UP = false);
+    throwBtn.addEventListener("touchstart", () => keyboard.E = true);
+    throwBtn.addEventListener("touchend", () => keyboard.E = false);
+}
+
+function rotateCanvas() {
+    const canvas = document.getElementById("canvas");
+    canvas.style.transform = "rotate(90deg)";
+    canvas.style.transformOrigin = "center center";
 }
 
 function startGame() {
@@ -109,45 +151,55 @@ function continueGame() {
 }
 
 function enterFullscreen() {
-    const element = document.getElementById("fullscreen");
-    document.getElementById("fullscreen-exit-button").style.display = "block";
-    document.getElementById("fullscreen-button").style.display = "none";
-
-    if (element.requestFullscreen) {
-        element.requestFullscreen();
-    } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-    } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-    }
+    document.getElementById("fullscreen").requestFullscreen();
 }
 
 function exitFullscreen() {
-    document.getElementById("fullscreen-exit-button").style.display = "none";
-    document.getElementById("fullscreen-button").style.display = "block";
-
-    if (document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-    } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-    }
+    document.exitFullscreen();
 }
+
+document.addEventListener("fullscreenchange", () => {
+    const exitBtn = document.getElementById("fullscreen-exit-button");
+    const enterBtn = document.getElementById("fullscreen-button");
+
+    if (document.fullscreenElement) {
+        exitBtn.classList.remove("hidden");
+        enterBtn.classList.add("hidden");
+        document.getElementById("border-screen").classList.add("hidden");
+    } else {
+        exitBtn.classList.add("hidden");
+        enterBtn.classList.remove("hidden");
+        document.getElementById("border-screen").classList.remove("hidden")
+    }
+});
 
 function toggleControlsScreen() {
     const showControls = document.getElementById("controls-screen");
+    const controlIcons = document.getElementById("controls-wrapper");
+    const controlCancel = document.getElementById("control-cancel-button");
 
     if (showControls.style.display === "block") {
         showControls.style.display = "none";
+        controlCancel.style.display = "none";
+        controlIcons.style.display = "flex";
         document.getElementById("start-button").style.display = "block"
+        GAME_PAUSED = false;
+        backgroundMusic.volume = 0.2;
+
     } else {
         showControls.style.display = "block";
+        controlCancel.style.display = "block";
+        controlIcons.style.display = "none";
         document.getElementById("start-button").style.display = "none"
+
+        if (world) {
+            world.pauseGame();
+        }
     }
 }
 
 function backToTitleScreen() {
+    clearAllIntervals();
     GAME_OVER = false;
     GAME_PAUSED = false;
     backgroundMusic.pause();
@@ -156,9 +208,7 @@ function backToTitleScreen() {
     gameOverMusic.currentTime = 0;
     document.getElementById("pause-menu").style.display = "none";
     document.getElementById("game-over-screen").style.display = "none";
-
     document.getElementById("canvas").style.display = "none";
-
     document.getElementById("start-screen").style.display = "block";
     document.getElementById("splash-screen").style.display = "block";
 }
@@ -166,7 +216,7 @@ function backToTitleScreen() {
 function toggleImpressumScreen() {
     const showImpressum = document.getElementById("impressum-screen");
     const impressumOverlay = document.getElementById("impressum-overlay")
-    
+
     if (!impressumOverlay.innerHTML.trim()) {
         impressumOverlay.innerHTML = impressumTemplate();
     }
@@ -180,3 +230,20 @@ function toggleImpressumScreen() {
     }
 }
 
+function hideImpressum() {
+    let impressum = document.getElementById("impressum").classList.add("hidden");
+}
+
+function checkOrientation() {
+    const overlay = document.getElementById("rotateOverlay");
+
+    if (window.innerHeight > window.innerWidth) {
+        overlay.style.display = "flex";
+    } else {
+        overlay.style.display = "none";
+    }
+
+}
+
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("load", checkOrientation);

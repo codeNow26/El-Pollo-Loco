@@ -14,6 +14,20 @@ class Character extends MovableObject {
     isPreparingJump = false;
     jumpPrepFrames = 0;
     lastActiveTime = 0;
+    lastIdleFrameTime = 0;
+
+    IMAGES_IDLE = [
+        "img/2_character_pepe/1_idle/idle/I-1.png",
+        "img/2_character_pepe/1_idle/idle/I-2.png",
+        "img/2_character_pepe/1_idle/idle/I-3.png",
+        "img/2_character_pepe/1_idle/idle/I-4.png",
+        "img/2_character_pepe/1_idle/idle/I-5.png",
+        "img/2_character_pepe/1_idle/idle/I-6.png",
+        "img/2_character_pepe/1_idle/idle/I-7.png",
+        "img/2_character_pepe/1_idle/idle/I-8.png",
+        "img/2_character_pepe/1_idle/idle/I-9.png",
+        "img/2_character_pepe/1_idle/idle/I-10.png",
+    ]
 
     IMAGES_WALKING = [
         "img/2_character_pepe/2_walk/W-21.png",
@@ -95,6 +109,7 @@ class Character extends MovableObject {
     constructor() {
         super().loadImage('img/2_character_pepe/1_idle/idle/I-1.png');
         this.y = 140;
+        this.loadImages(this.IMAGES_IDLE);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_JUMPING);
         this.loadImages(this.IMAGES_DEAD);
@@ -110,6 +125,8 @@ class Character extends MovableObject {
         this.hurtAudio.volume = 0.4;
         this.dieAudio = new Audio("audio/hurt/Die Sound.mp3");
         this.dieAudio.volume = 0.4;
+        this.snoreAudio = new Audio("audio/snoring/El Pollo Snoring.mp3");
+        this.snoreAudio.volume = 0.05;
         this.lastStepTime = 0;
         this.lastActiveTime = Date.now();
         this.stepDelay = 300;
@@ -118,6 +135,7 @@ class Character extends MovableObject {
     }
 
     playRandomWalkSound() {
+        if (GAME_PAUSED) return;
         const randomIndex = Math.floor(Math.random() * this.AUDIO_WALKING.length);
         this.walkAudio.src = this.AUDIO_WALKING[randomIndex];
         this.walkAudio.playbackRate = this.speed / 6;
@@ -167,15 +185,19 @@ class Character extends MovableObject {
             }
             else if (this.isAboveGround() || this.isPreparingJump) {
                 this.animateJump();
-            }
-            else {
-                if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-                    this.animateWalk();
-                } else if (this.noKeyPressed() && !this.isAboveGround()) {
-                    this.sleep();
-                }
-            }
-        }, 16);
+            } else {
+        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+            this.animateWalk();
+
+        } else if (this.noKeyPressed()) {
+            this.animateIdle();
+
+        } else {
+            this.sleep();
+        }
+    }
+
+}, 16);
     }
 
 
@@ -192,10 +214,16 @@ class Character extends MovableObject {
         }
     }
 
+    animateIdle() {
+        let now = Date.now();
+        if (now - this.lastIdleFrameTime < 150) return;
+        this.playAnimation(this.IMAGES_IDLE);
+        this.lastIdleFrameTime = now;
+    }
+
     animateWalk() {
         let now = Date.now();
         if (now - this.lastWalkFrameTime < this.walkFrameSpeed) return;
-
         this.playAnimation(this.IMAGES_WALKING);
         this.lastWalkFrameTime = now;
     }
@@ -217,8 +245,18 @@ class Character extends MovableObject {
         if (now - this.lastSleepFrameTime < this.sleepFrameDelay) return;
         if (now - this.lastActiveTime > 5000) {
             this.playAnimation(this.IMAGES_SLEEPING);
+            if (this.snoreAudio.paused) {
+                this.snoreAudio.play();
+            }
             this.lastSleepFrameTime = now;
+        } else {
+            this.stopSnoring();
         }
+    }
+
+    stopSnoring() {
+        this.snoreAudio.pause();
+        this.snoreAudio.currentTime = 0;
     }
 
     animateJump() {
@@ -257,7 +295,6 @@ class Character extends MovableObject {
         return (this.bottle / maxBottles) * 100;
     }
 
-
     noKeyPressed() {
         return !(
             this.world.keyboard.LEFT ||
@@ -268,5 +305,4 @@ class Character extends MovableObject {
             this.world.keyboard.E
         );
     }
-
 }

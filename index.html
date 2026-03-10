@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="responsive.css">
     <title>Document</title>
     <script src="./js/audio-manager.js"></script>
     <script src="./models/drawable-object.class.js"></script>
@@ -38,16 +39,25 @@
     <div class="center">
         <h1 class="game-title">El Pollo Loco</h1>
         <div id="fullscreen" class="game-wrapper">
-            <div class="controls-wrapper">
+            <button id="control-cancel-button" onclick="toggleControlsScreen()">X</button>
+            <div id="controls-wrapper" class="controls-wrapper">
                 <img src="./img/start-screen/Impressum.png" id="impressum" onclick="toggleImpressumScreen()">
                 <img src="./img/start-screen/Controls.png" id="controls" onclick="toggleControlsScreen()">
                 <img src="./img/start-screen/Sound On.png" id="sound-on-icon" onclick="toggleMute()">
                 <img src="./img/start-screen/mute.png" id="mute" onclick="toggleMute()">
-                <img src="./img/start-screen/minimize-icon-5.png" id="fullscreen-exit-button"
+                <img src="./img/start-screen/minimize-icon-5.png" class="hidden" id="fullscreen-exit-button"
                     onclick="exitFullscreen()">
                 <img src="./img/start-screen/fullscreen.png" id="fullscreen-button" onclick="enterFullscreen()">
             </div>
             <canvas id="canvas" width="720" height="480"> </canvas>
+
+            <div id="mobile-controls">
+                <button id="btn-left">◀</button>
+                <button id="btn-right">▶</button>
+                <button id="btn-jump">⬆</button>
+                <button id="btn-throw">🍼</button>
+            </div>
+
             <img id="start-screen" src="img/9_intro_outro_screens/start/startscreen_1.png">
             <img id="controls-screen" src="./img/start-screen/El Pollo Controls.png">
             <div id="impressum-screen">
@@ -66,10 +76,16 @@
                 <img id="game-over-home-btn" onclick="backToTitleScreen()" src="./img/start-screen/home-button.png">
             </div>
             <div id="splash-screen">
-                <img class="border-screen" src="./img/start-screen/Borderscreen.png">
+                <img id="border-screen" class="border-screen" src="./img/start-screen/Borderscreen.png">
                 <img src="./img/start-screen/start-button.png" onclick="startGame()" id="start-button" value="Start" />
             </div>
+        </div>
+    </div>
 
+    <div id="rotateOverlay">
+        <div class="rotateContainer">
+            <div class="phone"></div>
+            <p class="rotate-text">Please rotate your device</p>
         </div>
     </div>
 

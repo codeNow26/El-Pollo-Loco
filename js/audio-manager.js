@@ -1,4 +1,4 @@
-let SOUND_MUTED = false;
+let SOUND_MUTED = localStorage.getItem("soundMuted") === "true";
 
 const originalPlay = HTMLMediaElement.prototype.play;
 
@@ -7,23 +7,35 @@ HTMLMediaElement.prototype.play = function () {
     return originalPlay.apply(this, arguments);
 };
 
+function updateMuteIcon() {
+    if (SOUND_MUTED) {
+        document.getElementById("mute").style.display = "block";
+        document.getElementById("sound-on-icon").style.display = "none";
+    } else {
+        document.getElementById("mute").style.display = "none";
+        document.getElementById("sound-on-icon").style.display = "block";
+    }
+}
+
 function toggleMute() {
     SOUND_MUTED = !SOUND_MUTED;
 
-    if (SOUND_MUTED == true) {
-        backgroundMusic.volume = 0.0;
-        document.getElementById("mute").style.display = "block";
-        document.getElementById("sound-on-icon").style.display = "none";
+    localStorage.setItem("soundMuted", SOUND_MUTED);
 
+    if (backgroundMusic) {
+        backgroundMusic.muted = SOUND_MUTED;
+
+        if (SOUND_MUTED) {
+            backgroundMusic.volume = 0.0;
+        } else {
+            backgroundMusic.volume = 0.2;
+        }
     }
-    if (SOUND_MUTED == false) {
-
-        backgroundMusic.volume = 0.2;
-        document.getElementById("sound-on-icon").style.display = "block";
-        document.getElementById("mute").style.display = "none";
-    }
-
-    console.log("Muted:", SOUND_MUTED);
+    updateMuteIcon();
 }
 
 window.toggleMute = toggleMute;
+
+window.addEventListener("DOMContentLoaded", () => {
+    updateMuteIcon();
+});

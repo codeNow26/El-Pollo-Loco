@@ -71,9 +71,16 @@ class World {
         this.throwableObjects.forEach(bottle => {
             this.level.enemies.forEach(enemy => {
                 if (!enemy.hasDied && bottle.checkImpact(enemy)) {
-                    enemy.die();
+
+                    if (enemy instanceof Endboss) {
+                        const oldEnergy = enemy.energy;
+                        enemy.hurt();
+                        if (enemy.energy !== oldEnergy) {
+                            this.statusBarEndboss.setPercentage(enemy.energy);
+                        }
+                    } else
+                        enemy.die();
                 }
-                bottle.checkImpact(enemy);
             });
         });
     }
@@ -283,6 +290,7 @@ class World {
     }
 
     resetWorld() {
+        clearAllIntervals();
         GAME_OVER = false;
         GAME_PAUSED = false;
         this.gameOverPending = false;
@@ -298,9 +306,9 @@ class World {
         this.camera_x = 0;
         this.throwableObjects = [];
 
-        gameOverMusic.volume = 0;
         backgroundMusic.currentTime = 0;
         backgroundMusic.volume = 0.2;
+        this.run();
     }
 }
 
