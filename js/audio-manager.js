@@ -7,6 +7,9 @@ HTMLMediaElement.prototype.play = function () {
     return originalPlay.apply(this, arguments);
 };
 
+/**
+ * Reflect mute state in the UI icons.
+ */
 function updateMuteIcon() {
     if (SOUND_MUTED) {
         document.getElementById("mute").style.display = "block";
@@ -17,26 +20,31 @@ function updateMuteIcon() {
     }
 }
 
+/**
+ * Toggle the global sound-muted flag and update storage + audio elements.
+ */
 function toggleMute() {
     SOUND_MUTED = !SOUND_MUTED;
-
     localStorage.setItem("soundMuted", SOUND_MUTED);
+    applyMute();
+    updateMuteIcon();
+}
 
-     if (world && world.character) {
-        world.character.snoreAudio.muted = SOUND_MUTED;
-    }
-
+/**
+ * Update audio elements to reflect the global mute flag.
+ */
+function applyMute() {
     if (backgroundMusic) {
         backgroundMusic.muted = SOUND_MUTED;
-
         if (SOUND_MUTED) {
-            
-            backgroundMusic.volume = 0.0;
+            backgroundMusic.volume = 0;
         } else {
             backgroundMusic.volume = 0.2;
         }
     }
-    updateMuteIcon();
+    if (world && world.character && world.character.snoreAudio) {
+        world.character.snoreAudio.muted = SOUND_MUTED;
+    }
 }
 
 window.toggleMute = toggleMute;

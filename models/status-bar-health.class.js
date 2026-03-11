@@ -1,3 +1,6 @@
+/**
+ * Health bar displaying player energy level.
+ */
 class StatusBarHealth extends StatusBar {
 
     IMAGES = [
@@ -9,6 +12,9 @@ class StatusBarHealth extends StatusBar {
         "img/7_statusbars/1_statusbar/2_statusbar_health/blue/100.png",
     ];
 
+    /**
+     * Initialize health bar at upper left corner.
+     */
     constructor() {
         super(20, 20, []);
            this.images = this.IMAGES;

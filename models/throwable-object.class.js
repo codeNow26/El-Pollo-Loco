@@ -1,3 +1,6 @@
+/**
+ * Projectile bottle that spins through the air and splashes on impact.
+ */
 class ThrowableObject extends MovableObject {
 
     IMAGES_SALSA_BOTTLE = [
@@ -16,10 +19,15 @@ class ThrowableObject extends MovableObject {
         "img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png",
     ]
 
-    constructor(x, y) {
+    /**
+     * @param {number} x  starting horizontal position
+     * @param {number} y  starting vertical position
+     */
+    constructor(x, y, direction) {
         super().loadImage(this.IMAGES_SALSA_BOTTLE[0]);
         this.x = x;
         this.y = y;
+        this.direction = direction;
         this.width = 50;
         this.height = 50;
 
@@ -31,16 +39,22 @@ class ThrowableObject extends MovableObject {
         this.throw();
     }
 
+    /**
+     * Launch object forward and apply gravity.
+     */
     throw() {
         this.speedY = 10;
         this.applyGravity();
         this.throwInterval = setInterval(() => {
             if (GAME_PAUSED) return;
             if (this.isBroken) return;
-            this.x += 10;
+            this.x += 10 * this.direction;
         }, 25);
     }
 
+    /**
+     * Rotate bottle while airborne by cycling images.
+     */
     animate() {
         this.rotationInterval = setInterval(() => {
             if (this.isBroken) return;
@@ -48,18 +62,27 @@ class ThrowableObject extends MovableObject {
         }, 100);
     }
 
+    /**
+     * Handle impact: stop and show splash animation.
+     */
     splash() {
         this.isBroken = true;
         this.stopMovement();
         this.playSplashAnimation();
     }
 
+    /**
+     * Cease all movement and clear timers.
+     */
     stopMovement() {
         this.speedY = 0;
         clearInterval(this.throwInterval);
         clearInterval(this.rotationInterval);
     }
 
+    /**
+     * Swap to splash frames and play underwater sound.
+     */
     playSplashAnimation() {
         this.loadImages(this.IMAGES_SALSA_BOTTLE_SPLASH);
         this.splashAudio.play();
@@ -72,6 +95,11 @@ class ThrowableObject extends MovableObject {
         }, 80);
     }
 
+    /**
+     * Test against an enemy; trigger splash on hit.
+     * @param {MovableObject} enemy
+     * @returns {boolean} true if impact occurred
+     */
     checkImpact(enemy) {
         if (this.isBroken) return;
 

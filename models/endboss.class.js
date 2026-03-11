@@ -1,3 +1,6 @@
+/**
+ * Boss enemy with intro sequence, multiple animations and health.
+ */
 class Endboss extends MovableObject {
 
     height = 500;
@@ -52,6 +55,9 @@ class Endboss extends MovableObject {
 
     ]
 
+    /**
+     * Initialize assets, sounds, position, and start behaviour loops.
+     */
     constructor() {
         super().loadImage(this.IMAGES_INTRO[0]);
         this.loadImages(this.IMAGES_INTRO);
@@ -63,14 +69,17 @@ class Endboss extends MovableObject {
         this.endbossDieAudio = new Audio("audio/Endboss/ChickenEndbossDie.mp3");
         this.endbossDieAudio.volume = 0.4;
         this.speed = 2;
-        this.x = 2500;
+        this.x = 6000;
         this.animate();
     }
 
+    /**
+     * Set up recurring movement and animation intervals.
+     */
     animate() {
         setInterval(() => {
             if (!this.hadFirstContact) {
-                if (world.character.x > 1900) {
+                if (world.character.x > 5400) {
                     this.startIntro();
                 }
                 return;
@@ -92,6 +101,9 @@ class Endboss extends MovableObject {
         }, 120);
     }
 
+    /**
+     * Play the boss introduction animation sequence.
+     */
     startIntro() {
         this.hadFirstContact = true;
         this.isIntroPlaying = true;
@@ -112,6 +124,9 @@ class Endboss extends MovableObject {
         }, 200);
     }
 
+    /**
+     * Begin the walking animation loop once intro is done.
+     */
     startWalkingAnimation() {
         this.walkingInterval = setInterval(() => {
             if (this.hasDied || this.isIntroPlaying) return;
@@ -119,20 +134,27 @@ class Endboss extends MovableObject {
         }, 150);
     }
 
+    /**
+     * Apply damage to boss, handle death or knockback.
+     */
     hurt() {
         if (this.hasDied) return;
         let timepassed = (Date.now() - this.lastHit) / 1000;
         if (timepassed < 1) return;
         this.lastHit = Date.now();
-        if (this.energy - 20 <= 0) {
+        this.energy -= 20;
+        if (this.energy <= 0) {
+            this.energy = 0;
             this.die();
             return;
         }
-        this.energy -= 20;
         this.x += 60;
         this.playRandomEndbossHurtSound();
     }
 
+    /**
+     * Trigger boss death state and audio.
+     */
     die() {
         if (this.hasDied) return;
         this.hasDied = true;
@@ -141,6 +163,9 @@ class Endboss extends MovableObject {
         this.endbossDieAudio.play()
     }
 
+    /**
+     * Play one of the hurt sound effects randomly.
+     */
     playRandomEndbossHurtSound() {
         const randomIndex = Math.floor(Math.random() * this.AUDIO_HURT.length);
         this.endbossHurtAudio.src = this.AUDIO_HURT[randomIndex];

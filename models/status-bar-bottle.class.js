@@ -1,3 +1,6 @@
+/**
+ * Status bar representing number of bottles collected.
+ */
 class StatusBarBottle extends StatusBar {
 
     IMAGES = [
@@ -10,6 +13,9 @@ class StatusBarBottle extends StatusBar {
 
     ];
 
+    /**
+     * Initialize bottle status bar at fixed screen position.
+     */
     constructor() {
         super(20, 120, []);
         this.images = this.IMAGES;
@@ -17,6 +23,10 @@ class StatusBarBottle extends StatusBar {
         this.setPercentage(0);
     }
 
+    /**
+     * Translate percentage into corresponding image index for bottle bar.
+     * @returns {number}
+     */
     resolveImageIndex() {
         if (this.percentage <= 0) return 0;
         if (this.percentage <= 20) return 1;

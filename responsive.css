@@ -25,7 +25,11 @@
     }
 
     #mobile-controls {
-    display: block;
-}
+        display: block;
+    }
+
+    #border-screen-wrapper {
+        display: none;
+    }
 
 }

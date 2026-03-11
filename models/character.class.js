@@ -1,5 +1,7 @@
+/**
+ * Player-controlled character with movement, animation and state logic.
+ */
 class Character extends MovableObject {
-
     height = 300;
     width = 150;
     speed = 8;
@@ -108,6 +110,9 @@ class Character extends MovableObject {
     ]
     world;
 
+    /**
+     * Initialize character properties, preload assets, and start loops.
+     */
     constructor() {
         super().loadImage('img/2_character_pepe/1_idle/idle/I-1.png');
         this.y = 140;
@@ -136,28 +141,17 @@ class Character extends MovableObject {
         this.applyGravity();
     }
 
-    playRandomWalkSound() {
-        if (GAME_PAUSED) return;
-        const randomIndex = Math.floor(Math.random() * this.AUDIO_WALKING.length);
-        this.walkAudio.src = this.AUDIO_WALKING[randomIndex];
-        this.walkAudio.playbackRate = this.speed / 6;
-        this.walkAudio.currentTime = 0;
-        this.walkAudio.play();
-    }
-
-    playRandomHurtSound() {
-        const randomIndex = Math.floor(Math.random() * this.AUDIO_HURT.length);
-        this.hurtAudio.src = this.AUDIO_HURT[randomIndex];
-        this.hurtAudio.playbackRate = this.speed / 6;
-        this.hurtAudio.currentTime = 0;
-        this.hurtAudio.play();
-    }
-
+    /**
+     * Kick off movement and animation loops.
+     */
     animate() {
         this.startMovement();
         this.startAnimation();
     }
 
+    /**
+     * Regularly process input and update position.
+     */
     startMovement() {
         setInterval(() => {
             if (GAME_OVER || GAME_PAUSED) return;
@@ -166,17 +160,23 @@ class Character extends MovableObject {
             }
             this.handleJumpInput();
             this.handleMovementInput();
-            this.world.camera_x = -this.x + 100;
+            this.world.camera_x = Math.round(-this.x + 100);
             this.handleWalkSound();
         }, 1000 / 60);
     }
 
+    /**
+     * Check keyboard state for jump request.
+     */
     handleJumpInput() {
         if (!this.isAboveGround() && (this.world.keyboard.SPACE || this.world.keyboard.UP)) {
             this.jump();
         }
     }
 
+    /**
+     * Move left/right based on keys and boundaries.
+     */
     handleMovementInput() {
         if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
             this.moveRight();
@@ -188,6 +188,9 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Continuously update animation frames.
+     */
     startAnimation() {
         setInterval(() => {
             if (GAME_OVER || GAME_PAUSED) return;
@@ -195,6 +198,16 @@ class Character extends MovableObject {
         }, 16);
     }
 
+    animateDeath() {
+        let now = Date.now();
+        if (now - this.lastDeathFrameTime < this.deathFrameDelay) return;
+        this.playAnimation(this.IMAGES_DEAD);
+        this.lastDeathFrameTime = now;
+    }
+
+    /**
+     * Choose which animation to display based on current state.
+     */
     updateAnimationState() {
         if (this.hasDied) {
             this.animateDeath();
@@ -211,10 +224,17 @@ class Character extends MovableObject {
         this.handleGroundAnimations();
     }
 
+    /**
+     * True if character is in the air or prepping jump.
+     * @returns {boolean}
+     */
     isJumping() {
         return this.isAboveGround() || this.isPreparingJump;
     }
 
+    /**
+     * Manage animations when character is on the ground.
+     */
     handleGroundAnimations() {
         if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
             this.stopSnoring();
@@ -231,19 +251,9 @@ class Character extends MovableObject {
         }
     }
 
-    handleWalkSound() {
-        let now = Date.now();
-        if (
-            (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) &&
-            !this.isAboveGround()
-        ) {
-            if (now - this.lastStepTime > this.stepDelay) {
-                this.playRandomWalkSound();
-                this.lastStepTime = now;
-            }
-        }
-    }
-
+    /**
+     * Advance idle animation frames periodically.
+     */
     animateIdle() {
         let now = Date.now();
         if (now - this.lastIdleFrameTime < 150) return;
@@ -251,6 +261,9 @@ class Character extends MovableObject {
         this.lastIdleFrameTime = now;
     }
 
+    /**
+     * Advance walking animation frames periodically.
+     */
     animateWalk() {
         let now = Date.now();
         if (now - this.lastWalkFrameTime < this.walkFrameSpeed) return;
@@ -258,6 +271,9 @@ class Character extends MovableObject {
         this.lastWalkFrameTime = now;
     }
 
+    /**
+     * Mark character as dead and play death audio.
+     */
     die() {
         if (this.hasDied) return;
         this.dieAudio.play()
@@ -266,10 +282,16 @@ class Character extends MovableObject {
         this.speed = 0;
     }
 
+    /**
+     * Bounce upward after stomping an enemy.
+     */
     jumpAfterKill() {
         this.speedY = 15;
     }
 
+    /**
+     * Show sleeping animation when idle too long.
+     */
     sleep() {
         let now = Date.now();
         if (now - this.lastSleepFrameTime < this.sleepFrameDelay) return;
@@ -284,11 +306,17 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Stop the snoring audio and reset time.
+     */
     stopSnoring() {
         this.snoreAudio.pause();
         this.snoreAudio.currentTime = 0;
     }
 
+    /**
+     * Select jump prep or air frame depending on phase.
+     */
     animateJump() {
         if (this.isJumpPreparation()) {
             this.playJumpPrepFrame();
@@ -297,10 +325,17 @@ class Character extends MovableObject {
         this.playJumpAirFrame();
     }
 
+    /**
+     * True during the short jump wind-up.
+     * @returns {boolean}
+     */
     isJumpPreparation() {
         return Date.now() - this.jumpStart < 40;
     }
 
+    /**
+     * Update image while performing jump prep.
+     */
     playJumpPrepFrame() {
         let now = Date.now();
         let frame;
@@ -314,6 +349,9 @@ class Character extends MovableObject {
         this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
     }
 
+    /**
+     * Choose correct jump sprite based on vertical speed.
+     */
     playJumpAirFrame() {
         let frame;
         if (this.speedY > 6) {
@@ -329,6 +367,11 @@ class Character extends MovableObject {
         } this.img = this.imageCache[this.IMAGES_JUMPING[frame]];
     }
 
+    /**
+     * Consume a bottle and return remaining percentage.
+     * @param {number} maxBottles
+     * @returns {number|false}
+     */
     useBottle(maxBottles) {
         if (this.bottle <= 0) return false;
         this.throwAudio.play();
@@ -336,6 +379,10 @@ class Character extends MovableObject {
         return (this.bottle / maxBottles) * 100;
     }
 
+    /**
+     * Check if no input keys are held.
+     * @returns {boolean}
+     */
     noKeyPressed() {
         return !(
             this.world.keyboard.LEFT ||

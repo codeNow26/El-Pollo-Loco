@@ -1,9 +1,15 @@
+/**
+ * Bottle collectible that flips on the ground and can be picked up.
+ */
 class Bottle extends MovableObject {
     height = 100;
     width = 100;
     y = 330;
     collected = false;
 
+    /**
+     * @param {number} x  initial horizontal position
+     */
     constructor(x) {
         super();
         this.x = x;
@@ -17,11 +23,17 @@ class Bottle extends MovableObject {
 
     }
 
+    /**
+     * Mark as collected and play pickup sound.
+     */
     collect() {
         this.collected = true;
         this.bottleAudio.play();
     }
 
+    /**
+     * Toggle direction regularly to animate bottle spin.
+     */
     flipAnimation() {
         this.flipInterval = setInterval(() => {
             this.otherDirection = !this.otherDirection;

@@ -1,3 +1,6 @@
+/**
+ * Generic on-screen status bar showing percentage via images.
+ */
 class StatusBar extends DrawableObject {
 
     x;
@@ -7,6 +10,11 @@ class StatusBar extends DrawableObject {
     percentage = 100;
     images = [];
 
+    /**
+     * @param {number} x        horizontal position on canvas
+     * @param {number} y        vertical position
+     * @param {string[]} images preloaded image paths representing bar states
+     */
     constructor(x, y, images) {
         super();
         this.x = x;
@@ -16,26 +24,34 @@ class StatusBar extends DrawableObject {
         this.setPercentage(100);
     }
 
+    /**
+     * Update the shown percentage and pick appropriate image.
+     * @param {number} percentage
+     */
     setPercentage(percentage) {
         this.percentage = percentage;
         let imagePath = this.images[this.resolveImageIndex()];
         this.img = this.imageCache[imagePath];
     }
 
+    /**
+     * Choose which image index corresponds to current percentage.
+     * @returns {number}
+     */
     resolveImageIndex() {
         if (this.percentage == 100) {
             return 5;
         }
-        else if (this.percentage > 80) {
+        else if (this.percentage >= 80) {
             return 4;
         }
-        else if (this.percentage > 60) {
+        else if (this.percentage >= 60) {
             return 3;
         }
-        else if (this.percentage > 40) {
+        else if (this.percentage >= 40) {
             return 2;
         }
-        else if (this.percentage > 20) {
+        else if (this.percentage >= 20) {
             return 1;
         }
         else {

@@ -1,3 +1,6 @@
+/**
+ * Standard walking enemy chicken.
+ */
 class Chicken extends MovableObject {
     height = 100;
     width = 90;
@@ -19,6 +22,9 @@ class Chicken extends MovableObject {
         "audio/Chicken/Chicken Die3.mp3"
     ]
 
+    /**
+     * @param {number} x  initial horizontal position
+     */
     constructor(x) {
         super().loadImage('./img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
         this.loadImages(this.IMAGES_WALKING);
@@ -30,6 +36,9 @@ class Chicken extends MovableObject {
         this.x = x;
     }
 
+    /**
+     * Start movement and walking animation loops.
+     */
     animate() {
         setInterval(() => {
             if (this.hasDied) return;
@@ -41,6 +50,9 @@ class Chicken extends MovableObject {
         }, 200);
     }
 
+    /**
+     * Kill the chicken, play death sound and stop motion.
+     */
     die() {
         if (this.hasDied) return;
         this.hasDied = true;
@@ -50,6 +62,9 @@ class Chicken extends MovableObject {
         this.playRandomChickenDeadSound();
     }
 
+    /**
+     * Play one of the chicken death audio clips.
+     */
     playRandomChickenDeadSound() {
         const randomIndex = Math.floor(Math.random() * this.AUDIO_CHICKEN_DEAD.length);
         this.chickenDeadAudio.src = this.AUDIO_CHICKEN_DEAD[randomIndex];

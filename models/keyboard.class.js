@@ -1,3 +1,6 @@
+/**
+ * Tracks keyboard state for game control keys.
+ */
 class Keyboard {
     LEFT = false;
     RIGHT = false;
@@ -6,10 +9,4 @@ class Keyboard {
     SPACE = false;
     E = false;
     ESC = false;
-
-    constructor() {
-
-    }
-
-
 }
