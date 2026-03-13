@@ -4,7 +4,11 @@ const originalPlay = HTMLMediaElement.prototype.play;
 
 HTMLMediaElement.prototype.play = function () {
     this.muted = SOUND_MUTED;
-    return originalPlay.apply(this, arguments);
+    const playPromise = originalPlay.apply(this, arguments);
+    if (playPromise !== undefined) {
+        playPromise.catch(() => { });
+    }
+    return playPromise;
 };
 
 /**

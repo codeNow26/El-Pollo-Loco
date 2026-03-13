@@ -11,6 +11,14 @@ class MovableObject extends DrawableObject {
     hasDied = false;
     knockbackSpeed = 0;
 
+    constructor() {
+        super();
+        this.offsetLeft = 0;
+        this.offsetRight = 0;
+        this.offsetTop = 0;
+        this.offsetBottom = 0;
+    }
+
     /**
      * Continuously apply gravitational acceleration to object.
      */
@@ -40,12 +48,12 @@ class MovableObject extends DrawableObject {
      * @param {MovableObject} mo
      * @returns {boolean}
      */
-    isColliding(mo) {
-        return this.x + this.width > mo.x &&
-            this.y + this.height > mo.y &&
-            this.x < mo.x &&
-            this.y < mo.y + mo.height;
-    }
+  isColliding(mo) {
+    return this.x + this.width - this.offsetRight > mo.x + mo.offsetLeft &&
+           this.y + this.height - this.offsetBottom > mo.y + mo.offsetTop &&
+           this.x + this.offsetLeft < mo.x + mo.width - mo.offsetRight &&
+           this.y + this.offsetTop < mo.y + mo.height - mo.offsetBottom;
+}
 
     /**
      * Check if collision occurred from above (used for stomping).
@@ -57,8 +65,8 @@ class MovableObject extends DrawableObject {
         const enemyTop = enemy.y;
         return (
             this.isColliding(enemy) &&
-            this.speedY <= 0 &&
-            characterBottom <= enemyTop + 20
+            this.speedY <= 10 &&
+            characterBottom <= enemyTop + 35
         );
     }
 

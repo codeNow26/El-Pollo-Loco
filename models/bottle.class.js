@@ -17,6 +17,10 @@ class Bottle extends MovableObject {
         this.loadImage('img/6_salsa_bottle/1_salsa_bottle_on_ground.png');
         this.otherDirection = false;
         this.flipAnimation();
+        this.offsetLeft = 10;
+        this.offsetRight = 10;
+        this.offsetTop = 10;
+        this.offsetBottom = 10;
 
         this.bottleAudio = new Audio("audio/Bottle/pickupBottle.wav")
         this.bottleAudio.volume = 0.3;

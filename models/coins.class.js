@@ -7,11 +7,17 @@ class Coin extends MovableObject {
     y = 260;
     collected = false;
 
+
+
     /**
      * @param {number} x  horizontal start position
      */
-    constructor(x,y) {
+    constructor(x, y) {
         super();
+        this.offsetLeft = 40;
+        this.offsetRight = 40;
+        this.offsetTop = 40;
+        this.offsetBottom = 40;
         this.x = x;
         this.y = y;
         this.loadImage('./img/8_coin/coin_2.png');

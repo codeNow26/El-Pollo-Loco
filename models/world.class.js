@@ -44,16 +44,12 @@ class World {
         this.run();
     }
 
-    /**
-     * Link the player character back to this world.
-     */
+    /** Link the player character back to this world. */
     setWorld() {
         this.character.world = this;
     }
 
-    /**
-     * Start recurring checks (collisions, win/lose, throws).
-     */
+    /** Start recurring checks (collisions, win/lose, throws). */
     run() {
         setInterval(() => {
             if (this.GAME_PAUSED) return;
@@ -64,9 +60,7 @@ class World {
         }, 1000 / 25);
     }
 
-    /**
-     * If player pressed throw key and cooldown expired, fire.
-     */
+    /** If player pressed throw key and cooldown expired, fire. */
     checkThrowObjects() {
         if (this.canThrowBottle()) {
             this.throwBottle();
@@ -97,9 +91,7 @@ class World {
         return { direction, bottleX };
     }
 
-    /**
-     * Handle logic for throwing a bottle object.
-     */
+    /** Handle logic for throwing a bottle object. */
     throwBottle() {
         const now = Date.now();
         this.character.stopSnoring();
@@ -115,9 +107,7 @@ class World {
         this.keyboard.E = false;
     }
 
-    /**
-     * Run all collision detection routines.
-     */
+    /** Run all collision detection routines. */
     checkCollisions() {
         this.checkEnemyCollisions();
         this.checkCoinCollisions()
@@ -125,17 +115,33 @@ class World {
         this.checkThrowableCollisions();
     }
 
-    /**
-     * Check for collisions between thrown bottles and enemies.
-     */
+
+    /** Check collisions between all throwable objects and enemies or the player. */
     checkThrowableCollisions() {
-        this.throwableObjects.forEach(bottle => {
-            this.level.enemies.forEach(enemy => {
-                if (!enemy.hasDied && bottle.checkImpact(enemy)) {
-                    this.handleBottleHit(enemy);
-                }
-            });
+        this.throwableObjects.forEach(obj => {
+            this.checkThrowableEnemyCollisions(obj);
+            this.checkThrowableCharacterCollisions(obj);
         });
+    }
+
+
+    /** Check if a thrown object hits any enemy and handle the result. */
+    checkThrowableEnemyCollisions(obj) {
+        this.level.enemies.forEach(enemy => {
+            if (!enemy.hasDied && obj.checkImpact(enemy)) {
+                this.handleBottleHit(enemy);
+            }
+        });
+    }
+
+    /** Check if a boss egg projectile collides with the player character. */
+    checkThrowableCharacterCollisions(obj) {
+        if (obj.type === "egg" && obj.isColliding(this.character)) {
+            this.character.hit();
+            this.character.knockbackSpeed = -20;
+            obj.splash();
+            this.statusBarHealth.setPercentage(this.character.energy);
+        }
     }
 
     /**
@@ -162,9 +168,7 @@ class World {
         }
     }
 
-    /**
-     * Check player collisions with all enemies and handle.
-     */
+    /** Check player collisions with all enemies and handle. */
     checkEnemyCollisions() {
         this.level.enemies.forEach(enemy => {
             if (enemy.hasDied) return;
@@ -207,15 +211,13 @@ class World {
         const characterCenter = this.character.x + this.character.width / 2;
 
         if (enemyCenter < characterCenter) {
-            this.character.knockbackSpeed = 20; 
+            this.character.knockbackSpeed = 20;
         } else {
-            this.character.knockbackSpeed = -20; 
+            this.character.knockbackSpeed = -20;
         }
     }
 
-    /**
-     * Collect coins when the character overlaps them.
-     */
+    /** Collect coins when the character overlaps them. */
     checkCoinCollisions() {
         this.level.coins.forEach((coin) => {
             if (!coin.collected && this.character.isColliding(coin)) {
@@ -231,9 +233,7 @@ class World {
         });
     }
 
-    /**
-     * Pick up bottle powerups when colliding.
-     */
+    /** Pick up bottle powerups when colliding. */
     checkBottleCollisions() {
         this.level.bottle.forEach((bottle) => {
             if (!bottle.collected && this.character.isColliding(bottle)) {
@@ -247,16 +247,12 @@ class World {
         });
     }
 
-    /**
-     * Reveal the restart button in the DOM.
-     */
+    /** Reveal the restart button in the DOM. */
     showRestartButton() {
         document.getElementById("restart-button").style.display = "block";
     }
 
-    /**
-     * Toggle the pause state of the game and UI.
-     */
+    /** Toggle the pause state of the game and UI. */
     togglePause() {
         if (GAME_PAUSED) {
             this.renderer.togglePauseMenu(false);
@@ -269,9 +265,7 @@ class World {
         }
     }
 
-    /**
-     * Pause the game, capture current screen and lower audio.
-     */
+    /** Pause the game, capture current screen and lower audio. */
     pauseGame() {
         GAME_PAUSED = true;
         this.character.stopSnoring();
@@ -280,9 +274,7 @@ class World {
         backgroundMusic.volume = 0.05;
     }
 
-    /**
-     * Check if the endboss is dead and trigger win.
-     */
+    /** Check if the endboss is dead and trigger win. */
     checkWonGame() {
         this.level.enemies.forEach((enemy) => {
             if (
@@ -296,9 +288,7 @@ class World {
         });
     }
 
-    /**
-     * Initiate win sequence with delay and screen display.
-     */
+    /** Initiate win sequence with delay and screen display  */
     wonGame() {
         this.winPending = true;
         setTimeout(() => {
@@ -312,18 +302,14 @@ class World {
         }, 1400);
     }
 
-    /**
-     * Check if game-over conditions are met.
-     */
+    /** Check if game-over conditions are met. */
     checkGameOver() {
         if (this.character.hasDied && !GAME_OVER && !this.gameOverPending) {
             this.gameOver();
         }
     }
 
-    /**
-     * Start the game-over sequence with delay and UI update.
-     */
+    /** Start the game-over sequence with delay and UI update. */
     gameOver() {
         this.gameOverPending = true;
         setTimeout(() => {
@@ -337,9 +323,7 @@ class World {
         }, 2000);
     }
 
-    /**
-     * Reset entire world state for a fresh start.
-     */
+    /** Reset entire world state for a fresh start. */
     resetWorld() {
         clearAllIntervals();
         this.resetGameState();
@@ -349,9 +333,7 @@ class World {
         this.run();
     }
 
-    /**
-     * Clear global flags and camera/projectiles state.
-     */
+    /** Clear global flags and camera/projectiles state. */
     resetGameState() {
         GAME_OVER = false;
         GAME_PAUSED = false;
@@ -361,9 +343,7 @@ class World {
         this.throwableObjects = [];
     }
 
-    /**
-     * Hide any UI elements shown from previous run.
-     */
+    /** Hide any UI elements shown from previous run. */
     resetUI() {
         this.renderer.toggleGameOverScreen(false);
         this.renderer.toggleGameWonScreen(false);
@@ -372,9 +352,7 @@ class World {
         document.getElementById("game-over-home-btn").style.display = "none";
     }
 
-    /**
-     * Reinitialize level and player object.
-     */
+    /** Reinitialize level and player object.*/
     resetLevel() {
         initLevel();
         this.level = level1;
@@ -382,9 +360,7 @@ class World {
         this.character.world = this;
     }
 
-    /**
-     * Stop all music and restore background audio settings.
-     */
+    /** Stop all music and restore background audio settings. */
     resetMusic() {
         if (gameOverMusic) {
             gameOverMusic.pause();

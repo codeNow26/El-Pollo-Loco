@@ -1,4 +1,4 @@
-@media (max-width: 1040px) {
+@media (max-width: 1400px) {
 
     #fullscreen {
         position: fixed;
@@ -24,12 +24,18 @@
         height: 100%;
     }
 
-    #mobile-controls {
-        display: block;
-    }
+
 
     #border-screen-wrapper {
         display: none;
     }
 
+    
+
+}
+
+@media (pointer: coarse) {
+    #mobile-controls {
+        display: flex;
+    }
 }

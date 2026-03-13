@@ -139,6 +139,10 @@ class Character extends MovableObject {
         this.stepDelay = 300;
         this.animate();
         this.applyGravity();
+        this.offsetLeft = 20;
+        this.offsetRight = 40;
+        this.offsetTop = 120;
+        this.offsetBottom = 10;
     }
 
     /**
@@ -165,18 +169,14 @@ class Character extends MovableObject {
         }, 1000 / 60);
     }
 
-    /**
-     * Check keyboard state for jump request.
-     */
+    /** Check keyboard state for jump request. */
     handleJumpInput() {
         if (!this.isAboveGround() && (this.world.keyboard.SPACE || this.world.keyboard.UP)) {
             this.jump();
         }
     }
 
-    /**
-     * Move left/right based on keys and boundaries.
-     */
+    /** Move left/right based on keys and boundaries */
     handleMovementInput() {
         if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
             this.moveRight();
@@ -188,9 +188,7 @@ class Character extends MovableObject {
         }
     }
 
-    /**
-     * Continuously update animation frames.
-     */
+    /** Continuously update animation frames */
     startAnimation() {
         setInterval(() => {
             if (GAME_OVER || GAME_PAUSED) return;
@@ -198,6 +196,7 @@ class Character extends MovableObject {
         }, 16);
     }
 
+    /** Play the death animation with a frame delay. */
     animateDeath() {
         let now = Date.now();
         if (now - this.lastDeathFrameTime < this.deathFrameDelay) return;
@@ -205,9 +204,7 @@ class Character extends MovableObject {
         this.lastDeathFrameTime = now;
     }
 
-    /**
-     * Choose which animation to display based on current state.
-     */
+    /** Choose which animation to display based on current state.*/
     updateAnimationState() {
         if (this.hasDied) {
             this.animateDeath();

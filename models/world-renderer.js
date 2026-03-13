@@ -33,9 +33,6 @@ class WorldRenderer {
         this.ctx.clearRect(0, 0, this.world.canvas.width, this.world.canvas.height);
     }
 
-
-
-
    /**
      * Render background layers and clouds with camera offset.
      */

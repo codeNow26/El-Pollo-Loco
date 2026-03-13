@@ -43,6 +43,17 @@ class Endboss extends MovableObject {
         "img/4_enemie_boss_chicken/5_dead/G26.png",
     ]
 
+    IMAGES_ATTACK = [
+        "img/4_enemie_boss_chicken/3_attack/G13.png",
+        "img/4_enemie_boss_chicken/3_attack/G14.png",
+        "img/4_enemie_boss_chicken/3_attack/G15.png",
+        "img/4_enemie_boss_chicken/3_attack/G16.png",
+        "img/4_enemie_boss_chicken/3_attack/G17.png",
+        "img/4_enemie_boss_chicken/3_attack/G18.png",
+        "img/4_enemie_boss_chicken/3_attack/G19.png",
+        "img/4_enemie_boss_chicken/3_attack/G20.png",
+    ]
+
     AUDIO_HURT = [
         "audio/Endboss/ChickenEndbossHurt1.mp3",
         "audio/Endboss/ChickenEndbossHurt2.mp3",
@@ -63,12 +74,13 @@ class Endboss extends MovableObject {
         this.loadImages(this.IMAGES_INTRO);
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_ATTACK);
         this.loadImages(this.IMAGES_DEAD);
         this.endbossHurtAudio = new Audio()
         this.endbossHurtAudio.volume = 0.4;
         this.endbossDieAudio = new Audio("audio/Endboss/ChickenEndbossDie.mp3");
         this.endbossDieAudio.volume = 0.4;
-        this.speed = 2;
+        this.speed = 5;
         this.x = 6000;
         this.animate();
     }
@@ -99,6 +111,12 @@ class Endboss extends MovableObject {
                 this.playAnimation(this.IMAGES_HURT);
             }
         }, 120);
+
+        setInterval(() => {
+            if (this.hadFirstContact) {
+                this.attack();
+            }
+        }, 5000);
     }
 
     /**
@@ -163,14 +181,26 @@ class Endboss extends MovableObject {
         this.endbossDieAudio.play()
     }
 
-    /**
-     * Play one of the hurt sound effects randomly.
-     */
-    playRandomEndbossHurtSound() {
-        const randomIndex = Math.floor(Math.random() * this.AUDIO_HURT.length);
-        this.endbossHurtAudio.src = this.AUDIO_HURT[randomIndex];
-        this.endbossHurtAudio.currentTime = 0;
-        this.endbossHurtAudio.play();
+    attack() {
+        this.playAnimation(this.IMAGES_ATTACK);
+
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                world.throwableObjects.push(
+                    new ThrowableObject(this.x - 100, this.y + 100, -1, "egg")
+                );
+            }, i * 300);
+        }
     }
-}
+
+        /**
+         * Play one of the hurt sound effects randomly.
+         */
+        playRandomEndbossHurtSound() {
+            const randomIndex = Math.floor(Math.random() * this.AUDIO_HURT.length);
+            this.endbossHurtAudio.src = this.AUDIO_HURT[randomIndex];
+            this.endbossHurtAudio.currentTime = 0;
+            this.endbossHurtAudio.play();
+        }
+    }
 
